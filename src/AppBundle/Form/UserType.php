@@ -12,9 +12,14 @@ class UserType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('username')
+            ->add('username', null, [
+                'attr' => ['class' => 'form-control'],
+                'label_attr' => ['class' => 'control-label'],
+            ])
             ->add('phoneNumber', null, [
                 'label' => 'Numéro de téléphone',
+                'attr' => ['class' => 'form-control'],
+                'label_attr' => ['class' => 'control-label'],
             ]);
     }
 
@@ -25,5 +30,3 @@ class UserType extends AbstractType
         ]);
     }
 }
-
-

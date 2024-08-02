@@ -1,16 +1,28 @@
+{# app/Resources/views/base.html.twig #}
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8" />
         <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}      <link rel="stylesheet" href="{{ asset('path/to/bootstrap.min.css') }}">
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('bundles/twbs/bootstrap/dist/css/bootstrap.min.css') }}">
+            <style>
+                .form-horizontal .form-group {
+                    margin-left: 0;
+                    margin-right: 0;
+                }
+                .form-horizontal .control-label {
+                    text-align: left;
+                }
+            </style>
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
         {% block body %}{% endblock %}
         {% block javascripts %}
-         <script src="{{ asset('path/to/jquery.min.js') }}"></script>
-        <script src="{{ asset('path/to/bootstrap.min.js') }}"></script>{% endblock %}
+            <script src="{{ asset('bundles/components/jquery/jquery.min.js') }}"></script>
+            <script src="{{ asset('bundles/twbs/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+        {% endblock %}
     </body>
 </html>
