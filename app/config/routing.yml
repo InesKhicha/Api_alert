@@ -1,0 +1,8 @@
+# app/config/routing.yml
+app:
+    resource: "@AppBundle/Controller/"
+    type:     annotation
+
+user_register:
+    path: /register
+    defaults: { _controller: AppBundle\Controller\RegistrationController::registerAction }

@@ -1,0 +1,10 @@
+# Learn more about services, parameters and containers at
+# https://symfony.com/doc/current/service_container.html
+# app/config/services.yml
+# app/config/services.yml
+services:
+    app.sms_service:
+        class: AppBundle\Service\SMSService
+        arguments:
+            - "%sms_api_key%"
+            - "@logger"

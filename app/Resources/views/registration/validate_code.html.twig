@@ -1,0 +1,19 @@
+{# app/Resources/views/registration/validate_code.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2>Validation du code</h2>
+
+    {% for flash_message in app.session.flashBag.get('error') %}
+        <div class="alert alert-danger">
+            {{ flash_message }}
+        </div>
+    {% endfor %}
+
+    <form method="post">
+        <label for="validation_code">Entrez le code de validation reçu par SMS :</label>
+        <input type="text" id="validation_code" name="validation_code" required>
+
+        <button type="submit" class="btn btn-primary">Valider</button>
+    </form>
+{% endblock %}
