@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\User;
+use AppBundle\Entity\CodeValide;
 use AppBundle\Form\UserType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,46 +25,61 @@ class RegistrationController extends Controller
             $validationCode = mt_rand(100000, 999999);
             $phoneNumber = $user->getPhoneNumber();
             $message = "Votre code de validation est : $validationCode";
-    
+
             $smsService = $this->get('app.sms_service');
             $response = $smsService->sendSms($phoneNumber, $message);
-    
-            // Vérifiez si l'envoi du SMS a réussi
+
             if (isset($response['success']) && $response['success']) {
-                // Stockez le code de validation dans la session
-                $this->get('session')->set('validation_code', $validationCode);
-                $this->get('session')->set('pending_user', $user);
-    
-                return $this->redirectToRoute('validate_code');
+                $em = $this->getDoctrine()->getManager();
+                $client = $em->getRepository('AppBundle:Client')->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
+                $user->setClient($client);
+                $em->persist($user);
+                $em->flush();
+
+                $codeValide = new CodeValide();
+                $codeValide->setCode($validationCode);
+                $codeValide->setExpired(false);
+                $codeValide->setCreatedAt(new \DateTime());
+                $codeValide->setUser($user);
+                $em->persist($codeValide);
+                $em->flush();
+
+                return $this->redirectToRoute('validate_code', ['userId' => $user->getId()]);
             } else {
                 $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
-                // Log l'erreur
                 $this->get('logger')->error('SMS sending failed', ['response' => $response]);
             }
         }
+
         return $this->render('registration/register.html.twig', [
             'form' => $form->createView(),
         ]);
     }
 
     /**
-     * @Route("/validate-code", name="validate_code")
+     * @Route("/validate-code/{userId}", name="validate_code")
      */
-    public function validateCodeAction(Request $request)
+    public function validateCodeAction(Request $request, $userId)
     {
         $submittedCode = $request->request->get('validation_code');
-        $storedCode = $this->get('session')->get('validation_code');
-        $user = $this->get('session')->get('pending_user');
+        $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository('AppBundle:User')->find($userId);
+        $codeValide = $em->getRepository('AppBundle:CodeValide')->findOneBy(['user' => $user, 'expired' => false]);
 
         if ($request->isMethod('POST')) {
-            if ($submittedCode == $storedCode) {
-                // Le code est valide, enregistrez l'utilisateur
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($user);
-                $em->flush();
+            $currentDateTime = new \DateTime();
+            $codeCreationTime = $codeValide->getCreatedAt();
+            $interval = $currentDateTime->diff($codeCreationTime);
+            $minutes = $interval->i;
+            $seconds = $interval->s;
 
-                $this->get('session')->remove('validation_code');
-                $this->get('session')->remove('pending_user');
+            if ($minutes > 3 || ($minutes == 3 && $seconds > 0)) {
+                $codeValide->setExpired(true);
+                $em->flush();
+                $this->addFlash('error', 'Le code de validation a expiré.');
+            } elseif ($submittedCode == $codeValide->getCode()) {
+                $codeValide->setExpired(true);
+                $em->flush();
 
                 $this->addFlash('success', 'Inscription réussie !');
                 return $this->redirectToRoute('homepage');
@@ -72,6 +88,8 @@ class RegistrationController extends Controller
             }
         }
 
-        return $this->render('registration/validate_code.html.twig');
+        return $this->render('registration/validate_code.html.twig', [
+            'userId' => $userId,
+        ]);
     }
 }

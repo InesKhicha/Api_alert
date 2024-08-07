@@ -1,6 +1,5 @@
 <?php
 // src/AppBundle/Form/UserType.php
-
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -20,6 +19,16 @@ class UserType extends AbstractType
                 'label' => 'Numéro de téléphone',
                 'attr' => ['class' => 'form-control'],
                 'label_attr' => ['class' => 'control-label'],
+            ])
+            ->add('champ1', null, [
+                'label' => 'Champ 1',
+                'attr' => ['class' => 'form-control'],
+                'label_attr' => ['class' => 'control-label'],
+            ])
+            ->add('champ2', null, [
+                'label' => 'Champ 2',
+                'attr' => ['class' => 'form-control'],
+                'label_attr' => ['class' => 'control-label'],
             ]);
     }
 
@@ -27,6 +36,7 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => 'AppBundle\Entity\User',
+            'csrf_protection' => false,
         ]);
     }
 }

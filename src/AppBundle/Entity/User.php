@@ -34,7 +34,21 @@ class User
      */
     private $phoneNumber;
 
-    // Ajoutez d'autres champs optionnels ici
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $champ1;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $champ2;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Client")
+     * @ORM\JoinColumn(name="id_clientAPI", referencedColumnName="id")
+     */
+    private $client;
 
     // Getters et Setters
     public function getId()
@@ -60,5 +74,35 @@ class User
     public function setPhoneNumber($phoneNumber)
     {
         $this->phoneNumber = $phoneNumber;
+    }
+
+    public function getChamp1()
+    {
+        return $this->champ1;
+    }
+
+    public function setChamp1($champ1)
+    {
+        $this->champ1 = $champ1;
+    }
+
+    public function getChamp2()
+    {
+        return $this->champ2;
+    }
+
+    public function setChamp2($champ2)
+    {
+        $this->champ2 = $champ2;
+    }
+
+    public function getClient()
+    {
+        return $this->client;
+    }
+
+    public function setClient($client)
+    {
+        $this->client = $client;
     }
 }
