@@ -6,3 +6,25 @@ app:
 user_register:
     path: /register
     defaults: { _controller: AppBundle\Controller\RegistrationController::registerAction }
+
+# app/config/routing.yml
+formulaire_create:
+    path:     /formulaire/create
+    defaults: { _controller: AppBundle:Formulaire:createFormulaire }
+
+formulaire_success:
+    path:     /formulaire/success/{code_formulaire}
+    defaults: { _controller: AppBundle:Formulaire:success }
+
+# app/config/routing.yml
+app_formulaire:
+    resource: "@AppBundle/Controller/"
+    type:     annotation
+
+creer_formulaire:
+    path:     /creer-formulaire
+    defaults: { _controller: AppBundle:Formulaire:creerFormulaire }
+
+afficher_formulaire:
+    path:     /formulaire/{code}
+    defaults: { _controller: AppBundle:Formulaire:afficherFormulaire }

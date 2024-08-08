@@ -3,7 +3,6 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity
@@ -12,43 +11,45 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User
 {
     /**
-     * @ORM\Column(type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
      */
-    private $username;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
-     * @Assert\Regex(
-     *     pattern="/^\d+$/",
-     *     message="Le numéro de téléphone doit contenir uniquement des chiffres."
-     * )
-     */
-    private $phoneNumber;
+    private $tel;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $champ1;
+    private $custom1;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $champ2;
+    private $custom2;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Client")
-     * @ORM\JoinColumn(name="id_clientAPI", referencedColumnName="id")
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $client;
+    private $custom3;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $custom4;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Formulaire")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $formulaire;
+
+    // Getters et setters pour chaque champ...
+
 
     // Getters et Setters
     public function getId()
@@ -56,53 +57,63 @@ class User
         return $this->id;
     }
 
-    public function getUsername()
+    public function getCustom1()
     {
-        return $this->username;
+        return $this->custom1;
     }
 
-    public function setUsername($username)
+    public function setCustom1($custom1)
     {
-        $this->username = $username;
+        $this->custom1 = $custom1;
     }
 
-    public function getPhoneNumber()
+    public function getTel()
     {
-        return $this->phoneNumber;
+        return $this->tel;
     }
 
-    public function setPhoneNumber($phoneNumber)
+    public function setTel($tel)
     {
-        $this->phoneNumber = $phoneNumber;
+        $this->tel = $tel;
     }
 
-    public function getChamp1()
+    public function getCustom2()
     {
-        return $this->champ1;
+        return $this->custom2;
     }
 
-    public function setChamp1($champ1)
+    public function setCustom2($custom2)
     {
-        $this->champ1 = $champ1;
+        $this->custom2 = $custom2;
     }
 
-    public function getChamp2()
+    public function getCustom3()
     {
-        return $this->champ2;
+        return $this->custom3;
     }
 
-    public function setChamp2($champ2)
+    public function setCustom3($custom3)
     {
-        $this->champ2 = $champ2;
+        $this->custom3 = $custom3;
     }
 
-    public function getClient()
+    public function getCustom4()
     {
-        return $this->client;
+        return $this->custom4;
     }
 
-    public function setClient($client)
+    public function setCustom4($custom4)
     {
-        $this->client = $client;
+        $this->custom4 = $custom4;
+    }
+
+    public function getFormulaire()
+    {
+        return $this->formulaire;
+    }
+
+    public function setFormulaire($formulaire)
+    {
+        $this->formulaire = $formulaire;
     }
 }

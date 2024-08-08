@@ -1,0 +1,16 @@
+{# app/Resources/views/formulaire/creer.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Créer un Formulaire</h1>
+    {{ form_start(form) }}
+        {{ form_row(form.tel) }}
+        {{ form_row(form.custom1) }}
+        {{ form_row(form.custom2) }}
+        {{ form_row(form.custom3) }}
+        {{ form_row(form.custom4) }}
+        {{ form_row(form.nom_formulaire) }}
+        <button type="submit">Valider</button>
+    {{ form_end(form) }}
+{% endblock %}

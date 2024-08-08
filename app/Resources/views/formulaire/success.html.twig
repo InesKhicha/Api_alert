@@ -1,0 +1,23 @@
+{# app/Resources/views/formulaire/success.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Formulaire créé avec succès</h1>
+    <p>Votre formulaire a été créé avec le code : {{ formulaire.codeFormulaire }}</p>
+    
+    <h2>Aperçu du formulaire</h2>
+    <form>
+        <div class="form-group">
+            <label for="tel">Téléphone</label>
+            <input type="text" class="form-control" id="tel" value="{{ formulaire.tel }}" disabled>
+        </div>
+        {% for customField in formulaire.customFields %}
+            <div class="form-group">
+                <label for="custom_{{ customField.id }}">{{ customField.label }}</label>
+                <input type="text" class="form-control" id="custom_{{ customField.id }}">
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Soumettre</button>
+    </form>
+{% endblock %}

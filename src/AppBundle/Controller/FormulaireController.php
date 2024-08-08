@@ -1,38 +1,86 @@
 <?php
-// src/AppBundle/Controller/RegistrationController.php
+// src/AppBundle/Controller/FormulaireController.php
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\User;
-use AppBundle\Entity\CodeValide;
-use AppBundle\Form\UserType;
+use AppBundle\Entity\Client;
+use AppBundle\Entity\Formulaire;
+use AppBundle\Form\FormulaireType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use AppBundle\Entity\CodeValide;
+use AppBundle\Entity\User;
+use AppBundle\Form\UserType;
 
-class RegistrationController extends Controller
+class FormulaireController extends Controller
 {
     /**
-     * @Route("/register", name="user_register")
+     * @Route("/creer-formulaire", name="creer_formulaire")
      */
-   /* public function registerAction(Request $request)
+    public function creerFormulaireAction(Request $request)
     {
+        $formulaire = new Formulaire();
+
+        // Récupérer le client via l'API key (simulation avec un paramètre query string 'api_key')
+        $apiKey = $request->query->get('apiKey');
+        $client = $this->getDoctrine()
+                       ->getRepository('AppBundle:Client')
+                       ->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
+
+        if (!$client) {
+            throw $this->createNotFoundException('Client non trouvé.');
+        }
+
+        $form = $this->createForm(FormulaireType::class, $formulaire);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Générer un code unique pour le formulaire
+            $codeFormulaire = bin2hex(random_bytes(10));
+            $formulaire->setCodeFormulaire($codeFormulaire);
+            $formulaire->setClient($client);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($formulaire);
+            $em->flush();
+
+            return $this->redirectToRoute('afficher_formulaire', ['code' => $codeFormulaire]);
+        }
+
+        return $this->render('formulaire/creer.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+ /**
+     * @Route("/formulaire/{code}", name="afficher_formulaire")
+     */
+    public function afficherFormulaireAction(Request $request, $code)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $formulaire = $em->getRepository('AppBundle:Formulaire')->findOneBy(['codeFormulaire' => $code]);
+
+        if (!$formulaire) {
+            throw $this->createNotFoundException('Formulaire non trouvé');
+        }
+
         $user = new User();
-        $form = $this->createForm(UserType::class, $user);
+        $user->setFormulaire($formulaire);
+
+        $form = $this->createForm(UserType::class, $user, ['formulaire' => $formulaire]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $validationCode = mt_rand(100000, 999999);
-            $phoneNumber = $user->getPhoneNumber();
+            $phoneNumber = $user->getTel();
             $message = "Votre code de validation est : $validationCode";
 
             $smsService = $this->get('app.sms_service');
             $response = $smsService->sendSms($phoneNumber, $message);
 
             if (isset($response['success']) && $response['success']) {
-                $em = $this->getDoctrine()->getManager();
-                $client = $em->getRepository('AppBundle:Client')->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
-                $user->setClient($client);
                 $em->persist($user);
                 $em->flush();
 
@@ -51,15 +99,16 @@ class RegistrationController extends Controller
             }
         }
 
-        return $this->render('registration/register.html.twig', [
+        return $this->render('formulaire/afficher.html.twig', [
+            'formulaire' => $formulaire,
             'form' => $form->createView(),
         ]);
     }
-*/
+
     /**
      * @Route("/validate-code/{userId}", name="validate_code")
      */
-  /*  public function validateCodeAction(Request $request, $userId)
+    public function validateCodeAction(Request $request, $userId)
     {
         $submittedCode = $request->request->get('validation_code');
         $em = $this->getDoctrine()->getManager();
@@ -88,8 +137,8 @@ class RegistrationController extends Controller
             }
         }
 
-        return $this->render('registration/validate_code.html.twig', [
+        return $this->render('formulaire/validate_code.html.twig', [
             'userId' => $userId,
         ]);
-    }*/
+    }
 }

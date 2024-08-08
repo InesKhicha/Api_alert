@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h2 class="mb-4">{{ formulaire.nomFormulaire }}</h2>
+
+        {{ form_start(form) }}
+            {% if formulaire.tel is not null %}
+                <div class="form-group row">
+                    {{ form_label(form.tel, 'Téléphone', {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
+                    <div class="col-sm-10">
+                        {{ form_widget(form.tel, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.tel) }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if formulaire.custom1 is not null %}
+                <div class="form-group row">
+                    {{ form_label(form.custom1, formulaire.custom1, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
+                    <div class="col-sm-10">
+                        {{ form_widget(form.custom1, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.custom1) }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if formulaire.custom2 is not null %}
+                <div class="form-group row">
+                    {{ form_label(form.custom2, formulaire.custom2, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
+                    <div class="col-sm-10">
+                        {{ form_widget(form.custom2, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.custom2) }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if formulaire.custom3 is not null %}
+                <div class="form-group row">
+                    {{ form_label(form.custom3, formulaire.custom3, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
+                    <div class="col-sm-10">
+                        {{ form_widget(form.custom3, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.custom3) }}
+                    </div>
+                </div>
+            {% endif %}
+            {% if formulaire.custom4 is not null %}
+                <div class="form-group row">
+                    {{ form_label(form.custom4, formulaire.custom4, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
+                    <div class="col-sm-10">
+                        {{ form_widget(form.custom4, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.custom4) }}
+                    </div>
+                </div>
+            {% endif %}
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
