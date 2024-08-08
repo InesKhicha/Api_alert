@@ -19,7 +19,7 @@ class WidgetController extends Controller
     var formContainer = document.getElementById('form-container');
     if (formContainer) {
         var iframe = document.createElement('iframe');
-        iframe.src = 'http://localhost:8000/register';
+        iframe.src = 'http://localhost:8000/formulaire/d32470b8d3c74fe583b8';
         iframe.width = '100%';
         iframe.height = '600px';
         iframe.style.border = 'none';
