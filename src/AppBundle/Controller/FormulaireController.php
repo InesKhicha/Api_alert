@@ -45,7 +45,7 @@ class FormulaireController extends Controller
             $em->persist($formulaire);
             $em->flush();
 
-            return $this->redirectToRoute('afficher_formulaire', ['code' => $codeFormulaire]);
+            return $this->redirectToRoute('mes_formulaires');
         }
 
         return $this->render('formulaire/creer.html.twig', [
@@ -141,4 +141,31 @@ class FormulaireController extends Controller
             'userId' => $userId,
         ]);
     }
+
+
+   /**
+     * @Route("/mes-formulaires", name="mes_formulaires")
+     */
+    public function mesFormulairesAction(Request $request)
+    {
+        $apiKey = $request->query->get('apiKey');
+        $client = $this->getDoctrine()
+        ->getRepository('AppBundle:Client')
+        ->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
+
+        if (!$client) {
+            throw $this->createNotFoundException('Client not found');
+        }
+
+        $formulaires = $this->getDoctrine()
+                            ->getRepository(Formulaire::class)
+                            ->findBy(['client' => $client]);
+
+        return $this->render('formulaire/mes_formulaires.html.twig', [
+            'formulaires' => $formulaires,
+        ]);
+    }
+
+    
+
 }

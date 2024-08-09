@@ -1,0 +1,66 @@
+{# app/Resources/views/formulaire/mes_formulaires.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h2 class="mb-4">Mes Formulaires</h2>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nom du Formulaire</th>
+                    <th>Code</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for formulaire in formulaires %}
+                    <tr>
+                        <td>{{ formulaire.nomFormulaire }}</td>
+                        <td>{{ formulaire.codeFormulaire }}</td>
+                        <td>
+                            <a href="{{ path('afficher_formulaire', {'code': formulaire.codeFormulaire}) }}" class="btn btn-primary">Afficher</a>
+                            <button class="btn btn-secondary" onclick="showExportCode('{{ formulaire.codeFormulaire }}')">Exporter</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div id="export-modal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Exporter le Code du Widget</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="widget-code" class="form-control" rows="3" readonly></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="copyWidgetCode()">Copier</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showExportCode(codeFormulaire) {
+            var widgetCode = '<script async src="http://localhost:8000/widget/' + codeFormulaire + '.js"><\/script>';
+            document.getElementById('widget-code').value = widgetCode;
+            $('#export-modal').modal('show');
+        }
+
+        function copyWidgetCode() {
+            var copyText = document.getElementById("widget-code");
+            copyText.select();
+            document.execCommand("copy");
+            alert("Code copié: " + copyText.value);
+        }
+    </script>
+{% endblock %}
