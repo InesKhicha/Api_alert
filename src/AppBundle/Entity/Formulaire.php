@@ -20,7 +20,7 @@ class Formulaire
     /**
      * @ORM\Column(type="string")
      */
-    private $tel="Télephone";
+    private $phone="Télephone";
 
     /**
      * @ORM\Column(type="string", nullable=true)
@@ -53,24 +53,24 @@ class Formulaire
     private $codeFormulaire;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Client")
-     * @ORM\JoinColumn(name="id_client", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="Groupe")
+     * @ORM\JoinColumn(name="id_groupe", referencedColumnName="id")
      */
-    private $client;
+    private $groupe;
 
     public function getId()
     {
         return $this->id;
     }
 
-    public function getTel()
+    public function getPhone()
     {
-        return $this->tel;
+        return $this->phone;
     }
 
-    public function setTel($tel)
+    public function setPhone($phone)
     {
-        $this->tel = "Télephone";
+        $this->phone = "Télephone";
         return $this;
     }
 
@@ -140,14 +140,14 @@ class Formulaire
         return $this;
     }
 
-    public function getClient()
+    public function getGroupe()
     {
-        return $this->client;
+        return $this->groupe;
     }
 
-    public function setClient($client)
+    public function setGroupe($groupe)
     {
-        $this->client = $client;
+        $this->groupe = $groupe;
         return $this;
     }
 }

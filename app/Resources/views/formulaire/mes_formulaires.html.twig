@@ -48,14 +48,14 @@
             </div>
         </div>
     </div>
+    
 
     <script>
-        function showExportCode(codeFormulaire) {
-            var widgetCode = '<script async src="http://localhost:8000/widget/' + codeFormulaire + '.js"><\/script>';
-            document.getElementById('widget-code').value = widgetCode;
-            $('#export-modal').modal('show');
-        }
-
+      function showExportCode(codeFormulaire) {
+    var widgetCode = '<div id="form-container">\n    <!-- votre formulaire sera chargé ici -->\n</div><script async src="http://localhost:8000/widget/' + codeFormulaire + '.js"><\/script>';
+    document.getElementById('widget-code').value = widgetCode;
+    $('#export-modal').modal('show');
+}
         function copyWidgetCode() {
             var copyText = document.getElementById("widget-code");
             copyText.select();

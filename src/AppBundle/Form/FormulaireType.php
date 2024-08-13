@@ -12,7 +12,7 @@ class FormulaireType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('tel', TextType::class, [
+            ->add('phone', TextType::class, [
                 'label' => 'Téléphone',
                 'disabled' => true,
                 'data' => 'Téléphone'

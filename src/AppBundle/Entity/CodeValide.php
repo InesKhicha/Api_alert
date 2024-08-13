@@ -33,10 +33,10 @@ class CodeValide
     private $createdAt;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="id_user", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="FileContent")
+     * @ORM\JoinColumn(name="id_filecontent", referencedColumnName="id")
      */
-    private $user;
+    private $filecontent;
 
     // Getters et Setters
     public function getId()
@@ -74,13 +74,13 @@ class CodeValide
         $this->createdAt = $createdAt;
     }
 
-    public function getUser()
+    public function getFilecontent()
     {
-        return $this->user;
+        return $this->filecontent;
     }
 
-    public function setUser($user)
+    public function setFilecontent($filecontent)
     {
-        $this->user = $user;
+        $this->filecontent = $filecontent;
     }
 }

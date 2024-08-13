@@ -9,8 +9,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use AppBundle\Entity\CodeValide;
-use AppBundle\Entity\User;
-use AppBundle\Form\UserType;
+use AppBundle\Entity\FileContent;
+use AppBundle\Form\FileContentType;
+use AppBundle\Entity\Groupe;
 
 class FormulaireController extends Controller
 {
@@ -22,15 +23,31 @@ class FormulaireController extends Controller
         $formulaire = new Formulaire();
 
         // Récupérer le client via l'API key (simulation avec un paramètre query string 'api_key')
-        $apiKey = $request->query->get('apiKey');
-        $client = $this->getDoctrine()
-                       ->getRepository('AppBundle:Client')
+       
+        $smsUser = $this->getDoctrine()
+                       ->getRepository('AppBundle:SmsUser')
                        ->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
 
-        if (!$client) {
-            throw $this->createNotFoundException('Client non trouvé.');
-        }
-
+                       if (!$smsUser) {
+                        throw $this->createNotFoundException('SmsUser non trouvé.');
+                    }
+                
+                    $userId = $smsUser->getId(); // Récupérer l'ID de l'utilisateur SmsUser
+                
+                    $id = 1; // Remplacer par l'ID du groupe que vous souhaitez récupérer
+                
+                    $groupeRepository = $this->getDoctrine()->getRepository(Groupe::class);
+                
+                    // Appeler la méthode pour trouver le groupe
+                    $groupe = $groupeRepository->findOneBy([
+                        'id' => $id,
+                        'user' => $smsUser // Utiliser l'objet SmsUser directement
+                    ]);
+                
+                    if (!$groupe) {
+                        // Gérer le cas où le groupe n'est pas trouvé
+                        throw $this->createNotFoundException('Groupe not found.');
+                    }
         $form = $this->createForm(FormulaireType::class, $formulaire);
 
         $form->handleRequest($request);
@@ -39,7 +56,7 @@ class FormulaireController extends Controller
             // Générer un code unique pour le formulaire
             $codeFormulaire = bin2hex(random_bytes(10));
             $formulaire->setCodeFormulaire($codeFormulaire);
-            $formulaire->setClient($client);
+            $formulaire->setGroupe($groupe);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($formulaire);
@@ -65,34 +82,34 @@ class FormulaireController extends Controller
             throw $this->createNotFoundException('Formulaire non trouvé');
         }
 
-        $user = new User();
-        $user->setFormulaire($formulaire);
+        $fileContent = new FileContent($formulaire);
+        
 
-        $form = $this->createForm(UserType::class, $user, ['formulaire' => $formulaire]);
+        $form = $this->createForm(FileContentType::class, $fileContent, ['formulaire' => $formulaire]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $validationCode = mt_rand(100000, 999999);
-            $phoneNumber = $user->getTel();
+            $phoneNumber = $fileContent->getPhone();
             $message = "Votre code de validation est : $validationCode";
 
             $smsService = $this->get('app.sms_service');
             $response = $smsService->sendSms($phoneNumber, $message);
 
             if (isset($response['success']) && $response['success']) {
-                $em->persist($user);
+                $em->persist($fileContent);
                 $em->flush();
 
                 $codeValide = new CodeValide();
                 $codeValide->setCode($validationCode);
                 $codeValide->setExpired(false);
                 $codeValide->setCreatedAt(new \DateTime());
-                $codeValide->setUser($user);
+                $codeValide->setFileContent($fileContent);
                 $em->persist($codeValide);
                 $em->flush();
 
-                return $this->redirectToRoute('validate_code', ['userId' => $user->getId()]);
+                return $this->redirectToRoute('validate_code', ['userId' => $fileContent->getId()]);
             } else {
                 $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
                 $this->get('logger')->error('SMS sending failed', ['response' => $response]);
@@ -112,8 +129,8 @@ class FormulaireController extends Controller
     {
         $submittedCode = $request->request->get('validation_code');
         $em = $this->getDoctrine()->getManager();
-        $user = $em->getRepository('AppBundle:User')->find($userId);
-        $codeValide = $em->getRepository('AppBundle:CodeValide')->findOneBy(['user' => $user, 'expired' => false]);
+        $filecontent = $em->getRepository('AppBundle:FileContent')->find($userId);
+        $codeValide = $em->getRepository('AppBundle:CodeValide')->findOneBy(['filecontent' => $filecontent, 'expired' => false]);
 
         if ($request->isMethod('POST')) {
             $currentDateTime = new \DateTime();
@@ -148,24 +165,36 @@ class FormulaireController extends Controller
      */
     public function mesFormulairesAction(Request $request)
     {
-        $apiKey = $request->query->get('apiKey');
-        $client = $this->getDoctrine()
-        ->getRepository('AppBundle:Client')
+        $smsUser = $this->getDoctrine()
+        ->getRepository('AppBundle:SmsUser')
         ->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
 
-        if (!$client) {
-            throw $this->createNotFoundException('Client not found');
-        }
-
+        if (!$smsUser) {
+         throw $this->createNotFoundException('SmsUser non trouvé.');
+     }
+ 
+     $userId = $smsUser->getId(); // Récupérer l'ID de l'utilisateur SmsUser
+ 
+     $id = 1; // Remplacer par l'ID du groupe que vous souhaitez récupérer
+ 
+     $groupeRepository = $this->getDoctrine()->getRepository(Groupe::class);
+ 
+     // Appeler la méthode pour trouver le groupe
+     $groupe = $groupeRepository->findOneBy([
+         'id' => $id,
+         'user' => $smsUser // Utiliser l'objet SmsUser directement
+     ]);
+ 
+     if (!$groupe) {
+         // Gérer le cas où le groupe n'est pas trouvé
+         throw $this->createNotFoundException('Groupe not found.');
+     }
         $formulaires = $this->getDoctrine()
                             ->getRepository(Formulaire::class)
-                            ->findBy(['client' => $client]);
+                            ->findBy(['groupe' => $groupe]);
 
         return $this->render('formulaire/mes_formulaires.html.twig', [
             'formulaires' => $formulaires,
         ]);
     }
-
-    
-
 }
