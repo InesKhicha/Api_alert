@@ -13,6 +13,25 @@
                     </div>
                 </div>
             {% endif %}
+
+            {% if formulaire.lastname is not null %}
+                <div class="form-group row">
+                    {{ form_label(form.lastname, formulaire.lastname, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
+                    <div class="col-sm-10">
+                        {{ form_widget(form.lastname, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.lastname) }}
+                    </div>
+                </div>
+            {% endif %}
+                        {% if formulaire.firstname is not null %}
+                <div class="form-group row">
+                    {{ form_label(form.firstname, formulaire.firstname, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
+                    <div class="col-sm-10">
+                        {{ form_widget(form.firstname, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.firstname) }}
+                    </div>
+                </div>
+            {% endif %}
             {% if formulaire.custom1 is not null %}
                 <div class="form-group row">
                     {{ form_label(form.custom1, formulaire.custom1, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}

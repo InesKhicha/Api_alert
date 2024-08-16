@@ -280,5 +280,32 @@ class FileContent
     {
         $this->formulaire = $formulaire;
     }
+
+
+    public function getLastname()
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname($lastname)
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+
+    public function getFirstname()
+    {
+        return $this->firstname;
+    }
+
+   
+    public function setFirstname($firstname)
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
 }
 

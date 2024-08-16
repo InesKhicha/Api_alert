@@ -53,7 +53,22 @@ class FormulaireController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Générer un code unique pour le formulaire
+            // Check if lastname and firstname are set to default values
+            if ($formulaire->getLastname() === 'Nom') {
+                // Only set to 'Nom' if button has been clicked
+                $formulaire->setLastname('Nom');
+            } else {
+                // Here we set it to null if not clicked
+                $formulaire->setLastname(null);
+            }
+        
+            if ($formulaire->getFirstname() === 'Prénom') {
+                // Only set to 'Prénom' if button has been clicked
+                $formulaire->setFirstname('Prénom');
+            } else {
+                // Here we set it to null if not clicked
+                $formulaire->setFirstname(null);
+            }
             $codeFormulaire = bin2hex(random_bytes(10));
             $formulaire->setCodeFormulaire($codeFormulaire);
             $formulaire->setGroupe($groupe);
@@ -197,4 +212,32 @@ class FormulaireController extends Controller
             'formulaires' => $formulaires,
         ]);
     }
+
+    
+    /**
+ * @Route("/supprimer-formulaire/{id}", name="supprimer_formulaire")
+ */
+public function supprimerFormulaireAction(Request $request, $id)
+{
+    $em = $this->getDoctrine()->getManager();
+    $formulaire = $em->getRepository(Formulaire::class)->find($id);
+
+    if (!$formulaire) {
+        throw $this->createNotFoundException('Formulaire non trouvé');
+    }
+
+    // Suppression des FileContent associés
+    $fileContents = $em->getRepository(FileContent::class)->findBy(['formulaire' => $formulaire]);
+    foreach ($fileContents as $fileContent) {
+        $em->remove($fileContent);
+    }
+
+    // Suppression du formulaire
+    $em->remove($formulaire);
+    $em->flush();
+
+    $this->addFlash('success', 'Le formulaire a été supprimé avec succès.');
+
+    return $this->redirectToRoute('mes_formulaires');
+}
 }

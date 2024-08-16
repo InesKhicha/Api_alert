@@ -14,20 +14,21 @@ class FormulaireType extends AbstractType
         $builder
             ->add('phone', TextType::class, [
                 'label' => 'Téléphone',
-                'disabled' => true,
                 'data' => 'Téléphone'
             ])
-            ->add('custom1', TextType::class, ['required' => false])
-            ->add('custom2', TextType::class, ['required' => false])
-            ->add('custom3', TextType::class, ['required' => false])
-            ->add('custom4', TextType::class, ['required' => false])
+            ->add('lastname', TextType::class, ['required' => false, 'label' => 'Nom'])
+            ->add('firstname', TextType::class, ['required' => false, 'label' => 'Prénom'])
+            ->add('custom1', TextType::class, ['required' => false , 'label' => 'Champ personnalisé 1'])
+            ->add('custom2', TextType::class, ['required' => false , 'label' => 'Champ personnalisé 2'])
+            ->add('custom3', TextType::class, ['required' => false , 'label' => 'Champ personnalisé 3'])
+            ->add('custom4', TextType::class, ['required' => false , 'label' => 'Champ personnalisé 4'])
             ->add('nom_formulaire', TextType::class, ['label' => 'Nom du Formulaire']);
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => 'AppBundle\Entity\Formulaire',
+           'data_class' => 'AppBundle\Entity\Formulaire',
         ]);
-    }
+    } 
 }

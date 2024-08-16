@@ -248,4 +248,5 @@ class Groupe
     {
         $this->columnsSelected = $columnsSelected;
     }
+    
 }

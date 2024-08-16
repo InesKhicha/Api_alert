@@ -22,10 +22,22 @@ class Formulaire
      */
     private $phone="Télephone";
 
+    
+
     /**
      * @ORM\Column(type="string", nullable=true)
      */
     private $custom1;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $lastname;
+
+        /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $firstname;
 
     /**
      * @ORM\Column(type="string", nullable=true)
@@ -148,6 +160,34 @@ class Formulaire
     public function setGroupe($groupe)
     {
         $this->groupe = $groupe;
+        return $this;
+    }
+
+
+    public function getLastname()
+    {
+        return $this->lastname;
+    }
+
+   
+    public function setLastname($lastname)
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+  
+    public function getFirstname()
+    {
+        return $this->firstname;
+    }
+
+
+    public function setFirstname($firstname)
+    {
+        $this->firstname = $firstname;
+
         return $this;
     }
 }

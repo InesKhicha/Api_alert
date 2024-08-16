@@ -18,7 +18,6 @@ class FileContentType extends AbstractType
 
         $builder
             ->add('phone', TextType::class, [
-                'label' => 'Téléphone',
                 'required' => true,
                 'constraints' => [
                     new Assert\NotBlank(),
@@ -29,7 +28,35 @@ class FileContentType extends AbstractType
                 ],
             ]);
 
-        if ($formulaire->getCustom1()) {
+       
+            if ($formulaire->getLastname()) {
+                $builder->add('lastname', TextType::class, [
+                    'label' => $formulaire->getLastname(),
+                    'required' => false,
+                    'constraints' => [
+                        new Assert\Length([
+                            'max' => 255,
+                            'maxMessage' => 'Le champ ne peut pas dépasser {{ limit }} caractères.',
+                        ]),
+                    ],
+                ]);
+            }
+
+            if ($formulaire->getFirstname()) {
+                $builder->add('firstname', TextType::class, [
+                    'label' => $formulaire->getFirstname(),
+                    'required' => false,
+                    'constraints' => [
+                        new Assert\Length([
+                            'max' => 255,
+                            'maxMessage' => 'Le champ ne peut pas dépasser {{ limit }} caractères.',
+                        ]),
+                    ],
+                ]);
+            }
+
+
+            if ($formulaire->getCustom1()) {
             $builder->add('custom1', TextType::class, [
                 'label' => $formulaire->getCustom1(),
                 'required' => false,

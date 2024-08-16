@@ -1,16 +1,182 @@
-{# app/Resources/views/formulaire/creer.html.twig #}
-
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .sidebar {
+            background-color: #00B6B7;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+            height: 100vh;
+            position: fixed;
+            width: 300px;
+            transition: width 0.3s ease;
+        }
+        .sidebar h4 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .sidebar .card {
+            background-color: #fff;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .sidebar .card:hover {
+            transform: translateY(-5px);
+            background-color: #e0e0e0;
+        }
+        .sidebar .card .card-body {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar .card .card-body i {
+            font-size: 28px;
+            color: #00B6B7;
+            margin-right: 10px;
+        }
+        .main-content {
+            margin-left: 320px; /* Adjusted for wider sidebar */
+            padding: 20px;
+        }
+        .main-content h1 {
+            color: #00B6B7;
+            margin-bottom: 30px;
+        }
+        .draggable-field {
+            cursor: move;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+        .draggable-field:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+        .btn-custom, .btn-success {
+            background-color: #00B6B7;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-custom:hover, .btn-success:hover {
+            background-color: #0056b3;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
+<div class="sidebar">
+    <h4>Ajouter des Champs</h4>
+    <div class="card" id="add-firstname">
+        <div class="card-body">
+            <i class="fas fa-user"></i> Prénom
+        </div>
+    </div>
+    <div class="card" id="add-lastname">
+        <div class="card-body">
+            <i class="fas fa-user"></i> Nom
+        </div>
+    </div>
+    <div class="card" id="add-custom-field">
+        <div class="card-body">
+            <i class="fas fa-plus"></i> Champ Personnalisé
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
     <h1>Créer un Formulaire</h1>
-    {{ form_start(form) }}
-        {{ form_row(form.phone) }}
-        {{ form_row(form.custom1) }}
-        {{ form_row(form.custom2) }}
-        {{ form_row(form.custom3) }}
-        {{ form_row(form.custom4) }}
-        {{ form_row(form.nom_formulaire) }}
-        <button type="submit">Valider</button>
-    {{ form_end(form) }}
+    <div class="card p-4">
+        {{ form_start(form) }}
+
+        <div class="draggable-field" id="field-phone">
+            {{ form_widget(form.phone, {'attr': {'placeholder': 'Téléphone', 'class': 'form-control' , 'disabled':'true'}}) }}
+        </div>
+
+        <div id="optional-fields" class="field-container">
+            <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
+                {{ form_widget(form.firstname, {'attr': {'placeholder': 'Prénom', 'class': 'form-control'}}) }}
+            </div>
+            <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
+                {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
+            </div>
+            {% for i in 1..4 %}
+                <div class="draggable-field optional-field" id="field-custom{{ i }}" style="display: none;">
+                    {{ form_widget(attribute(form, 'custom' ~ i), {'attr': {'placeholder': 'Saisissez le nom de votre champ', 'class': 'form-control'}}) }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form_row(form.nom_formulaire, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        <div class="form-group text-center mt-4">
+            <button type="submit" class="btn btn-success">Valider</button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    $(document).ready(function() {
+        $('#optional-fields').sortable({
+            handle: '.draggable-field',
+            placeholder: 'ui-state-highlight',
+            start: function(event, ui) {
+                ui.placeholder.height(ui.item.height());
+            }
+        });
+
+        $('#add-firstname').click(function() {
+            $('#field-firstname').fadeIn();
+            $('input[name$="[firstname]"]').val('Prénom');
+            $(this).prop("disabled", true);
+        });
+
+        $('#add-lastname').click(function() {
+            $('#field-lastname').fadeIn();
+            $('input[name$="[lastname]"]').val('Nom');
+            $(this).prop("disabled", true);
+        });
+
+        let customFieldIndex = 1;
+        const totalCustomFields = 4;
+
+        $('#add-custom-field').click(function() {
+            if (customFieldIndex <= totalCustomFields) {
+                $('#field-custom' + customFieldIndex).fadeIn();
+                customFieldIndex++;
+            } else {
+                alert("Tous les champs personnalisés ont déjà été ajoutés.");
+                $(this).prop("disabled", true);
+            }
+        });
+    });
+    </script>
 {% endblock %}
