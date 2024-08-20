@@ -32,11 +32,7 @@ class CodeValide
      */
     private $createdAt;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="FileContent")
-     * @ORM\JoinColumn(name="id_filecontent", referencedColumnName="id")
-     */
-    private $filecontent;
+
 
     // Getters et Setters
     public function getId()
@@ -74,13 +70,5 @@ class CodeValide
         $this->createdAt = $createdAt;
     }
 
-    public function getFilecontent()
-    {
-        return $this->filecontent;
-    }
 
-    public function setFilecontent($filecontent)
-    {
-        $this->filecontent = $filecontent;
-    }
 }

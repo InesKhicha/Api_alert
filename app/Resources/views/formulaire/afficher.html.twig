@@ -1,78 +1,161 @@
 {% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        h2 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+        h2:after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 3px;
+            background: #00B6B7;
+            margin: 10px auto;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            font-weight: 500;
+            color: #555;
+        }
+        .form-control {
+            border: none;
+            border-bottom: 2px solid #ddd;
+            border-radius: 0;
+            padding: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #00B6B7;
+        }
+        .btn-primary {
+            background-color: #00B6B7;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #009a9b;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            position: relative;
+            margin-bottom: 35px;
+        }
+        .form-group i {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            color: #00B6B7;
+        }
+        .form-control {
+            padding-left: 30px;
+        }
+        .invalid-feedback {
+            color: #ff4757;
+            font-size: 0.875em;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <div class="container mt-5">
-        <h2 class="mb-4">{{ formulaire.nomFormulaire }}</h2>
+        <h2>{{ formulaire.nomFormulaire }}</h2>
 
-        {{ form_start(form) }}
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
             {% if formulaire.phone is not null %}
-                <div class="form-group row">
-                    {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
-                    <div class="col-sm-10">
-                        {{ form_widget(form.phone, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.phone) }}
-                    </div>
+                <div class="form-group">
+                    <i class="fas fa-phone"></i>
+                    {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'sr-only'}}) }}
+                    {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone'}}) }}
+                    {{ form_errors(form.phone) }}
                 </div>
             {% endif %}
 
             {% if formulaire.lastname is not null %}
-                <div class="form-group row">
-                    {{ form_label(form.lastname, formulaire.lastname, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
-                    <div class="col-sm-10">
-                        {{ form_widget(form.lastname, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.lastname) }}
-                    </div>
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    {{ form_label(form.lastname, formulaire.lastname, {'label_attr': {'class': 'sr-only'}}) }}
+                    {{ form_widget(form.lastname, {'attr': {'class': 'form-control', 'placeholder': formulaire.lastname}}) }}
+                    {{ form_errors(form.lastname) }}
                 </div>
             {% endif %}
-                        {% if formulaire.firstname is not null %}
-                <div class="form-group row">
-                    {{ form_label(form.firstname, formulaire.firstname, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
-                    <div class="col-sm-10">
-                        {{ form_widget(form.firstname, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.firstname) }}
-                    </div>
+
+            {% if formulaire.firstname is not null %}
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    {{ form_label(form.firstname, formulaire.firstname, {'label_attr': {'class': 'sr-only'}}) }}
+                    {{ form_widget(form.firstname, {'attr': {'class': 'form-control', 'placeholder': formulaire.firstname}}) }}
+                    {{ form_errors(form.firstname) }}
                 </div>
             {% endif %}
-            {% if formulaire.custom1 is not null %}
-                <div class="form-group row">
-                    {{ form_label(form.custom1, formulaire.custom1, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
-                    <div class="col-sm-10">
-                        {{ form_widget(form.custom1, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.custom1) }}
+
+            {% for i in 1..4 %}
+                {% set customField = attribute(formulaire, 'custom' ~ i) %}
+                {% if customField is not null %}
+                    <div class="form-group">
+                        <i class="fas fa-pencil-alt"></i>
+                        {{ form_label(attribute(form, 'custom' ~ i), customField, {'label_attr': {'class': 'sr-only'}}) }}
+                        {{ form_widget(attribute(form, 'custom' ~ i), {'attr': {'class': 'form-control', 'placeholder': customField}}) }}
+                        {{ form_errors(attribute(form, 'custom' ~ i)) }}
                     </div>
-                </div>
-            {% endif %}
-            {% if formulaire.custom2 is not null %}
-                <div class="form-group row">
-                    {{ form_label(form.custom2, formulaire.custom2, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
-                    <div class="col-sm-10">
-                        {{ form_widget(form.custom2, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.custom2) }}
-                    </div>
-                </div>
-            {% endif %}
-            {% if formulaire.custom3 is not null %}
-                <div class="form-group row">
-                    {{ form_label(form.custom3, formulaire.custom3, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
-                    <div class="col-sm-10">
-                        {{ form_widget(form.custom3, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.custom3) }}
-                    </div>
-                </div>
-            {% endif %}
-            {% if formulaire.custom4 is not null %}
-                <div class="form-group row">
-                    {{ form_label(form.custom4, formulaire.custom4, {'label_attr': {'class': 'col-sm-2 col-form-label'}}) }}
-                    <div class="col-sm-10">
-                        {{ form_widget(form.custom4, {'attr': {'class': 'form-control'}}) }}
-                        {{ form_errors(form.custom4) }}
-                    </div>
-                </div>
-            {% endif %}
-            <div class="form-group row">
-                <div class="col-sm-10 offset-sm-2">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-primary">Soumettre</button>
             </div>
         {{ form_end(form) }}
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            gsap.from('.container', {duration: 1, y: 50, opacity: 0, ease: 'power3.out'});
+            gsap.from('h2', {duration: 1, y: 20, opacity: 0, ease: 'power3.out', delay: 0.2});
+            gsap.from('.form-group', {duration: 0.8, y: 20, opacity: 0, ease: 'power3.out', stagger: 0.1, delay: 0.4});
+            gsap.from('.btn-primary', {duration: 0.8, scale: 0.8, opacity: 0, ease: 'back.out(1.7)', delay: 1});
+
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
 {% endblock %}

@@ -85,7 +85,7 @@ class FormulaireController extends Controller
         ]);
     }
 
- /**
+  /**
      * @Route("/formulaire/{code}", name="afficher_formulaire")
      */
     public function afficherFormulaireAction(Request $request, $code)
@@ -97,9 +97,7 @@ class FormulaireController extends Controller
             throw $this->createNotFoundException('Formulaire non trouvé');
         }
 
-        $fileContent = new FileContent($formulaire);
-        
-
+        $fileContent = new FileContent();
         $form = $this->createForm(FileContentType::class, $fileContent, ['formulaire' => $formulaire]);
 
         $form->handleRequest($request);
@@ -113,18 +111,35 @@ class FormulaireController extends Controller
             $response = $smsService->sendSms($phoneNumber, $message);
 
             if (isset($response['success']) && $response['success']) {
-                $em->persist($fileContent);
-                $em->flush();
+                // Store form data in session
+            // À l'intérieur de la méthode afficherFormulaireAction
+            $session = $request->getSession();
+
+            // Sérialisation des données avant encodage
+            $dataToEncode = serialize([
+                'phone' => $fileContent->getPhone(),
+                'lastname' => $fileContent->getLastname(),
+                'firstname' => $fileContent->getFirstname(),
+                'custom1' => $fileContent->getCustom1(),
+                'custom2' => $fileContent->getCustom2(),
+                'custom3' => $fileContent->getCustom3(),
+                'custom4' => $fileContent->getCustom4(),
+                'grp' => $fileContent->getGrp()
+            ]);
+
+            // Encodage en base64
+            $encodedData = base64_encode($dataToEncode);
+
+            $session->set('form_data', $encodedData);
 
                 $codeValide = new CodeValide();
                 $codeValide->setCode($validationCode);
                 $codeValide->setExpired(false);
                 $codeValide->setCreatedAt(new \DateTime());
-                $codeValide->setFileContent($fileContent);
                 $em->persist($codeValide);
                 $em->flush();
 
-                return $this->redirectToRoute('validate_code', ['userId' => $fileContent->getId()]);
+                return $this->redirectToRoute('validate_code', ['codeId' => $codeValide->getId()]);
             } else {
                 $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
                 $this->get('logger')->error('SMS sending failed', ['response' => $response]);
@@ -138,14 +153,13 @@ class FormulaireController extends Controller
     }
 
     /**
-     * @Route("/validate-code/{userId}", name="validate_code")
+     * @Route("/validate-code/{codeId}", name="validate_code")
      */
-    public function validateCodeAction(Request $request, $userId)
+    public function validateCodeAction(Request $request, $codeId)
     {
         $submittedCode = $request->request->get('validation_code');
         $em = $this->getDoctrine()->getManager();
-        $filecontent = $em->getRepository('AppBundle:FileContent')->find($userId);
-        $codeValide = $em->getRepository('AppBundle:CodeValide')->findOneBy(['filecontent' => $filecontent, 'expired' => false]);
+        $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
 
         if ($request->isMethod('POST')) {
             $currentDateTime = new \DateTime();
@@ -162,18 +176,43 @@ class FormulaireController extends Controller
                 $codeValide->setExpired(true);
                 $em->flush();
 
-                $this->addFlash('success', 'Inscription réussie !');
-                return $this->redirectToRoute('homepage');
+                // Retrieve form data from session
+                // À l'intérieur de la méthode validateCodeAction
+                $session = $request->getSession();
+
+                $encodedData = $session->get('form_data');
+                if ($encodedData) {
+                    // Décodage et désérialisation des données
+                    $decodedData = base64_decode($encodedData);
+                    $formData = unserialize($decodedData);
+                    
+                    if ($formData) {
+                        $fileContent = new FileContent();
+                        $fileContent->setPhone($formData['phone']);
+                        $fileContent->setLastname($formData['lastname']);
+                        $fileContent->setFirstname($formData['firstname']);
+                        $fileContent->setCustom1($formData['custom1']);
+                        $fileContent->setCustom2($formData['custom2']);
+                        $fileContent->setCustom3($formData['custom3']);
+                        $fileContent->setCustom4($formData['custom4']);
+                        $fileContent->setGrp($formData['grp']);
+
+                        $em->persist($fileContent);
+                        $em->flush();
+
+                        $this->addFlash('success', 'Inscription réussie !');
+                        return $this->redirectToRoute('homepage');
+                    }
+                }
             } else {
                 $this->addFlash('error', 'Code de validation incorrect.');
             }
         }
 
         return $this->render('formulaire/validate_code.html.twig', [
-            'userId' => $userId,
+            'codeId' => $codeId,
         ]);
     }
-
 
    /**
      * @Route("/mes-formulaires", name="mes_formulaires")
@@ -226,12 +265,7 @@ public function supprimerFormulaireAction(Request $request, $id)
         throw $this->createNotFoundException('Formulaire non trouvé');
     }
 
-    // Suppression des FileContent associés
-    $fileContents = $em->getRepository(FileContent::class)->findBy(['formulaire' => $formulaire]);
-    foreach ($fileContents as $fileContent) {
-        $em->remove($fileContent);
-    }
-
+    
     // Suppression du formulaire
     $em->remove($formulaire);
     $em->flush();

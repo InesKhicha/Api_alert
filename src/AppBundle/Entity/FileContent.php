@@ -11,7 +11,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * @ORM\Entity
  * @ORM\Table(name="FileContent")
- * @UniqueEntity(fields={"phone", "formulaire"}, message="Vous etes déja inscrit avec ce numéro.")
  */
 class FileContent
 {
@@ -92,8 +91,10 @@ class FileContent
      */
     private $nbEventSent;
 
+
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\ManyToOne(targetEntity="Groupe", inversedBy="fileContents")
+     * @ORM\JoinColumn(name="grp", referencedColumnName="id")
      */
     private $grp;
 
@@ -162,26 +163,16 @@ class FileContent
      */
     private $network;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Groupe", inversedBy="fileContents")
-     * @ORM\JoinColumn(name="grp", referencedColumnName="id")
-     */
-    private $groupe;
-
   /**
      * @ORM\Column(type="integer")
      */
     private $formImport;
 
  
-    /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Formulaire")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $formulaire;
+
 
  // Constructeur
- public function __construct($formulaire
+ public function __construct(
 
 ) {
     $this->content = " ";
@@ -197,7 +188,7 @@ class FileContent
     $this->rgpdPolicy = 1;
     $this->nbEventSent = 0;
     $this->formImport = " ";
-    $this->formulaire = $formulaire;
+
 
     // Initialisation des valeurs par défaut
     $this->datetimeEvent = null; // ou une valeur par défaut si nécessaire
@@ -271,15 +262,6 @@ class FileContent
         $this->custom4 = $custom4;
     }
 
-    public function getFormulaire()
-    {
-        return $this->formulaire;
-    }
-
-    public function setFormulaire($formulaire)
-    {
-        $this->formulaire = $formulaire;
-    }
 
 
     public function getLastname()
@@ -304,6 +286,26 @@ class FileContent
     public function setFirstname($firstname)
     {
         $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of grp
+     */ 
+    public function getGrp()
+    {
+        return $this->grp;
+    }
+
+    /**
+     * Set the value of grp
+     *
+     * @return  self
+     */ 
+    public function setGrp($grp)
+    {
+        $this->grp = $grp;
 
         return $this;
     }

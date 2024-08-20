@@ -3,85 +3,170 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f9f9f9;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+            overflow-x: hidden;
         }
         .sidebar {
             background-color: #00B6B7;
-            padding: 20px;
+            padding: 30px;
             border-right: 1px solid #ddd;
             height: 100vh;
             position: fixed;
             width: 300px;
-            transition: width 0.3s ease;
+            transition: all 0.5s ease;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
         }
         .sidebar h4 {
             color: #fff;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .sidebar .card {
             background-color: #fff;
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
             cursor: pointer;
-            transition: transform 0.3s ease, background-color 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
         }
         .sidebar .card:hover {
-            transform: translateY(-5px);
-            background-color: #e0e0e0;
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
         .sidebar .card .card-body {
-            padding: 15px;
+            padding: 20px;
             display: flex;
             align-items: center;
         }
         .sidebar .card .card-body i {
-            font-size: 28px;
+            font-size: 24px;
             color: #00B6B7;
-            margin-right: 10px;
+            margin-right: 15px;
+            transition: transform 0.3s ease;
+        }
+        .sidebar .card:hover .card-body i {
+            transform: rotate(15deg);
         }
         .main-content {
-            margin-left: 320px; /* Adjusted for wider sidebar */
-            padding: 20px;
+            margin-left: 330px;
+            padding: 40px;
+            transition: all 0.5s ease;
         }
         .main-content h1 {
             color: #00B6B7;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .main-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background-color: #00B6B7;
+            transition: width 0.3s ease;
+        }
+        .main-content h1:hover::after {
+            width: 100px;
         }
         .draggable-field {
             cursor: move;
-            padding: 15px;
-            border: 1px solid #ddd;
-            margin-bottom: 15px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 20px;
             background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .draggable-field::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, #00B6B7, #0056b3);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .draggable-field:hover::before {
+            transform: scaleX(1);
         }
         .draggable-field:hover {
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px);
         }
         .form-control {
             border-radius: 10px;
-            border: 1px solid #ddd;
-            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            padding: 12px 15px;
             font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #00B6B7;
+            box-shadow: 0 0 0 3px rgba(0, 182, 183, 0.1);
         }
         .btn-custom, .btn-success {
             background-color: #00B6B7;
             color: white;
             border: none;
             border-radius: 10px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 182, 183, 0.3);
         }
         .btn-custom:hover, .btn-success:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0, 86, 179, 0.4);
+        }
+        .delete-field {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+        .draggable-field:hover .delete-field {
+            opacity: 1;
+        }
+        .delete-field:hover {
+            background-color: #ff1a1a;
+            transform: rotate(90deg);
+        }
+        .ui-state-highlight {
+            height: 80px;
+            background-color: #f0f8ff;
+            border: 2px dashed #00B6B7;
+            border-radius: 15px;
         }
     </style>
 {% endblock %}
@@ -118,13 +203,16 @@
         <div id="optional-fields" class="field-container">
             <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
                 {{ form_widget(form.firstname, {'attr': {'placeholder': 'Prénom', 'class': 'form-control'}}) }}
+                <button type="button" class="delete-field" data-field="firstname"><i class="fas fa-trash"></i></button>
             </div>
             <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
                 {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
+                <button type="button" class="delete-field" data-field="lastname"><i class="fas fa-trash"></i></button>
             </div>
             {% for i in 1..4 %}
                 <div class="draggable-field optional-field" id="field-custom{{ i }}" style="display: none;">
                     {{ form_widget(attribute(form, 'custom' ~ i), {'attr': {'placeholder': 'Saisissez le nom de votre champ', 'class': 'form-control'}}) }}
+                    <button type="button" class="delete-field" data-field="custom{{ i }}"><i class="fas fa-trash"></i></button>
                 </div>
             {% endfor %}
         </div>
@@ -143,6 +231,7 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
     <script>
     $(document).ready(function() {
         $('#optional-fields').sortable({
@@ -153,16 +242,21 @@
             }
         });
 
+        function addField(fieldId, fieldName) {
+            const field = $('#field-' + fieldId);
+            field.css('display', 'block');
+            field.find('input').val(fieldName);
+            $('#add-' + fieldId).prop("disabled", true);
+
+            gsap.from(field, {duration: 0.5, y: 50, opacity: 0, ease: "power3.out"});
+        }
+
         $('#add-firstname').click(function() {
-            $('#field-firstname').fadeIn();
-            $('input[name$="[firstname]"]').val('Prénom');
-            $(this).prop("disabled", true);
+            addField('firstname', 'Prénom');
         });
 
         $('#add-lastname').click(function() {
-            $('#field-lastname').fadeIn();
-            $('input[name$="[lastname]"]').val('Nom');
-            $(this).prop("disabled", true);
+            addField('lastname', 'Nom');
         });
 
         let customFieldIndex = 1;
@@ -170,13 +264,42 @@
 
         $('#add-custom-field').click(function() {
             if (customFieldIndex <= totalCustomFields) {
-                $('#field-custom' + customFieldIndex).fadeIn();
+                addField('custom' + customFieldIndex, '');
                 customFieldIndex++;
-            } else {
-                alert("Tous les champs personnalisés ont déjà été ajoutés.");
-                $(this).prop("disabled", true);
+                if (customFieldIndex > totalCustomFields) {
+                    $(this).prop("disabled", true);
+                }
             }
         });
+
+        $(document).on('click', '.delete-field', function() {
+            const fieldId = $(this).data('field');
+            const field = $('#field-' + fieldId);
+
+            gsap.to(field, {
+                duration: 0.3,
+                y: -20,
+                opacity: 0,
+                ease: "power3.in",
+                onComplete: function() {
+                    field.css('display', 'none');
+                    field.find('input').val('');
+                    if (fieldId === 'firstname' || fieldId === 'lastname') {
+                        $('#add-' + fieldId).prop("disabled", false);
+                    } else if (fieldId.startsWith('custom')) {
+                        customFieldIndex--;
+                        $('#add-custom-field').prop("disabled", false);
+                    }
+                    // Reset the position and opacity for future display
+                    gsap.set(field, {y: 0, opacity: 1});
+                }
+            });
+        });
+
+        // Initial animation for the sidebar
+        gsap.from('.sidebar', {duration: 1, x: -300, ease: "power3.out"});
+        gsap.from('.main-content', {duration: 1, x: 100, opacity: 0, ease: "power3.out", delay: 0.3});
+        gsap.from('.card', {duration: 0.5, y: 50, opacity: 0, ease: "power3.out", stagger: 0.1, delay: 0.5});
     });
     </script>
 {% endblock %}
