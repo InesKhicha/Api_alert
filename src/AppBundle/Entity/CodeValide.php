@@ -32,6 +32,23 @@ class CodeValide
      */
     private $createdAt;
 
+    /**
+     * @ORM\Column(type="string", length=32)
+     */
+    private $phone;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $formData; // New attribute
+
+    public function setFormData($formData) {
+        $this->formData = $formData;
+    }
+
+    public function getFormData() {
+        return $this->formData;
+    }
 
 
     // Getters et Setters
@@ -71,4 +88,24 @@ class CodeValide
     }
 
 
+
+    /**
+     * Get the value of phone
+     */ 
+    public function getPhone()
+    {
+        return $this->phone;
+    }
+
+    /**
+     * Set the value of phone
+     *
+     * @return  self
+     */ 
+    public function setPhone($phone)
+    {
+        $this->phone = $phone;
+
+        return $this;
+    }
 }

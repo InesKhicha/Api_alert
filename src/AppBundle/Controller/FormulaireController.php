@@ -92,60 +92,55 @@ class FormulaireController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $formulaire = $em->getRepository('AppBundle:Formulaire')->findOneBy(['codeFormulaire' => $code]);
-
+    
         if (!$formulaire) {
             throw $this->createNotFoundException('Formulaire non trouvé');
         }
-
+    
         $fileContent = new FileContent();
         $form = $this->createForm(FileContentType::class, $fileContent, ['formulaire' => $formulaire]);
-
+    
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             $validationCode = mt_rand(100000, 999999);
             $phoneNumber = $fileContent->getPhone();
             $message = "Votre code de validation est : $validationCode";
-
+    
             $smsService = $this->get('app.sms_service');
             $response = $smsService->sendSms($phoneNumber, $message);
-
+    
             if (isset($response['success']) && $response['success']) {
-                // Store form data in session
-            // À l'intérieur de la méthode afficherFormulaireAction
-            $session = $request->getSession();
-
-            // Sérialisation des données avant encodage
-            $dataToEncode = serialize([
-                'phone' => $fileContent->getPhone(),
-                'lastname' => $fileContent->getLastname(),
-                'firstname' => $fileContent->getFirstname(),
-                'custom1' => $fileContent->getCustom1(),
-                'custom2' => $fileContent->getCustom2(),
-                'custom3' => $fileContent->getCustom3(),
-                'custom4' => $fileContent->getCustom4(),
-                'grp' => $fileContent->getGrp()
-            ]);
-
-            // Encodage en base64
-            $encodedData = base64_encode($dataToEncode);
-
-            $session->set('form_data', $encodedData);
-
                 $codeValide = new CodeValide();
                 $codeValide->setCode($validationCode);
                 $codeValide->setExpired(false);
                 $codeValide->setCreatedAt(new \DateTime());
+                $codeValide->setPhone($fileContent->getPhone());
+    
+                // Serialize form data to store in CodeValide
+                $dataToEncode = serialize([
+                    'phone' => $fileContent->getPhone(),
+                    'lastname' => $fileContent->getLastname(),
+                    'firstname' => $fileContent->getFirstname(),
+                    'custom1' => $fileContent->getCustom1(),
+                    'custom2' => $fileContent->getCustom2(),
+                    'custom3' => $fileContent->getCustom3(),
+                    'custom4' => $fileContent->getCustom4(),
+                    'grp' => $fileContent->getGrp()
+                ]);
+    
+                $codeValide->setFormData($dataToEncode);  // Storing form data in CodeValide
+    
                 $em->persist($codeValide);
                 $em->flush();
-
+    
                 return $this->redirectToRoute('validate_code', ['codeId' => $codeValide->getId()]);
             } else {
                 $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
                 $this->get('logger')->error('SMS sending failed', ['response' => $response]);
             }
         }
-
+    
         return $this->render('formulaire/afficher.html.twig', [
             'formulaire' => $formulaire,
             'form' => $form->createView(),
@@ -159,61 +154,56 @@ class FormulaireController extends Controller
     {
         $submittedCode = $request->request->get('validation_code');
         $em = $this->getDoctrine()->getManager();
+    
         $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
-
-        if ($request->isMethod('POST')) {
-            $currentDateTime = new \DateTime();
-            $codeCreationTime = $codeValide->getCreatedAt();
-            $interval = $currentDateTime->diff($codeCreationTime);
-            $minutes = $interval->i;
-            $seconds = $interval->s;
-
-            if ($minutes > 3 || ($minutes == 3 && $seconds > 0)) {
-                $codeValide->setExpired(true);
-                $em->flush();
-                $this->addFlash('error', 'Le code de validation a expiré.');
-            } elseif ($submittedCode == $codeValide->getCode()) {
-                $codeValide->setExpired(true);
-                $em->flush();
-
-                // Retrieve form data from session
-                // À l'intérieur de la méthode validateCodeAction
-                $session = $request->getSession();
-
-                $encodedData = $session->get('form_data');
-                if ($encodedData) {
-                    // Décodage et désérialisation des données
-                    $decodedData = base64_decode($encodedData);
-                    $formData = unserialize($decodedData);
-                    
+    
+        if ($codeValide) {
+            $fileContent = new FileContent();
+            $formData = unserialize($codeValide->getFormData());
+    
+            if ($formData) {
+                $fileContent->setPhone($formData['phone']);
+                $fileContent->setLastname($formData['lastname']);
+                $fileContent->setFirstname($formData['firstname']);
+                $fileContent->setCustom1($formData['custom1']);
+                $fileContent->setCustom2($formData['custom2']);
+                $fileContent->setCustom3($formData['custom3']);
+                $fileContent->setCustom4($formData['custom4']);
+                $fileContent->setGrp($formData['grp']);
+            }
+    
+            if ($request->isMethod('POST')) {
+                $currentDateTime = new \DateTime();
+                $codeCreationTime = $codeValide->getCreatedAt();
+                $interval = $currentDateTime->diff($codeCreationTime);
+                $minutes = $interval->i;
+                $seconds = $interval->s;
+    
+                if ($minutes > 3 || ($minutes == 3 && $seconds > 0)) {
+                    $codeValide->setExpired(true);
+                    $em->flush();
+                    $this->addFlash('error', 'Le code de validation a expiré.');
+                } elseif ($submittedCode == $codeValide->getCode()) {
+                    $codeValide->setExpired(true);
+                    $em->flush();
+    
                     if ($formData) {
-                        $fileContent = new FileContent();
-                        $fileContent->setPhone($formData['phone']);
-                        $fileContent->setLastname($formData['lastname']);
-                        $fileContent->setFirstname($formData['firstname']);
-                        $fileContent->setCustom1($formData['custom1']);
-                        $fileContent->setCustom2($formData['custom2']);
-                        $fileContent->setCustom3($formData['custom3']);
-                        $fileContent->setCustom4($formData['custom4']);
-                        $fileContent->setGrp($formData['grp']);
-
                         $em->persist($fileContent);
                         $em->flush();
-
+    
                         $this->addFlash('success', 'Inscription réussie !');
                         return $this->redirectToRoute('homepage');
                     }
+                } else {
+                    $this->addFlash('error', 'Code de validation incorrect.');
                 }
-            } else {
-                $this->addFlash('error', 'Code de validation incorrect.');
             }
         }
-
+    
         return $this->render('formulaire/validate_code.html.twig', [
             'codeId' => $codeId,
         ]);
     }
-
    /**
      * @Route("/mes-formulaires", name="mes_formulaires")
      */
