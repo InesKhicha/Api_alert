@@ -10,6 +10,16 @@
             background-color: #f0f4f8;
             overflow-x: hidden;
         }
+
+        .is-invalid {
+            border-color: #dc3545;
+        }
+
+        .invalid-feedback {
+            color: #dc3545;
+            display: block;
+        }
+
         .sidebar {
             background-color: #00B6B7;
             padding: 30px;
@@ -201,6 +211,10 @@
         </div>
 
         <div id="optional-fields" class="field-container">
+            <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
+                {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
+                <button type="button" class="delete-field" data-field="lastname"><i class="fas fa-trash"></i></button>
+            </div>
             <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
                 {{ form_widget(form.firstname, {'attr': {'placeholder': 'Prénom', 'class': 'form-control'}}) }}
                 <button type="button" class="delete-field" data-field="firstname"><i class="fas fa-trash"></i></button>
@@ -302,4 +316,67 @@
         gsap.from('.card', {duration: 0.5, y: 50, opacity: 0, ease: "power3.out", stagger: 0.1, delay: 0.5});
     });
     </script>
+
+<script>
+$(document).ready(function() {
+    const fields = ['phone', 'lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
+    const existingFields = {'nom': 'lastname', 'prénom': 'firstname'};
+    const phoneVariations = ['phone', 'tel', 'tél'];
+
+    function normalizeString(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    function validateFields() {
+        let values = {};
+        let isValid = true;
+
+        fields.forEach(field => {
+            const input = $(`#field-${field} input`);
+            const value = normalizeString(input.val());
+            input.removeClass('is-invalid');
+            input.next('.invalid-feedback').remove();
+
+            if (value) {
+                // Check for phone variations
+                if (phoneVariations.includes(value)) {
+                    isValid = false;
+                    addError(input, 'Utilisez "Téléphone" qui existe déja à la place de "tel" or "tél".');
+                }
+
+                if (values[value]) {
+                    isValid = false;
+                    addError(input, 'Duplicate value found.');
+                    addError($(`#field-${values[value]} input`), 'Duplicate value found.');
+                } else if (existingFields[value] && existingFields[value] !== field) {
+                    isValid = false;
+                    addError(input, `La valeur "${input.val()}" à déja un bouton existant.`);
+                } else {
+                    values[value] = field;
+                }
+            }
+        });
+
+        return isValid;
+    }
+
+    function addError(input, message) {
+        input.addClass('is-invalid');
+        input.after(`<div class="invalid-feedback">${message}</div>`);
+    }
+
+    $('form').on('submit', function(event) {
+        if (!validateFields()) {
+            event.preventDefault();
+        }
+    });
+
+    fields.forEach(field => {
+        $(`#field-${field} input`).on('input', function() {
+            validateFields();
+        });
+    });
+});
+</script>
+
 {% endblock %}
