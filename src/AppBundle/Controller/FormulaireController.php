@@ -12,6 +12,8 @@ use AppBundle\Entity\CodeValide;
 use AppBundle\Entity\FileContent;
 use AppBundle\Form\FileContentType;
 use AppBundle\Entity\Groupe;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 
 class FormulaireController extends Controller
 {
@@ -243,7 +245,7 @@ class FormulaireController extends Controller
     }
 
     
-    /**
+/**
  * @Route("/supprimer-formulaire/{id}", name="supprimer_formulaire")
  */
 public function supprimerFormulaireAction(Request $request, $id)
@@ -252,16 +254,12 @@ public function supprimerFormulaireAction(Request $request, $id)
     $formulaire = $em->getRepository(Formulaire::class)->find($id);
 
     if (!$formulaire) {
-        throw $this->createNotFoundException('Formulaire non trouvé');
+        return new JsonResponse(['status' => 'error', 'message' => 'Formulaire non trouvé'], 404);
     }
 
-    
-    // Suppression du formulaire
     $em->remove($formulaire);
     $em->flush();
 
-    $this->addFlash('success', 'Le formulaire a été supprimé avec succès.');
-
-    return $this->redirectToRoute('mes_formulaires');
+    return new JsonResponse(['status' => 'success', 'message' => 'Le formulaire a été supprimé avec succès.']);
 }
 }

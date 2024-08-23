@@ -5,12 +5,17 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 
 /**
  * @ORM\Entity
  * @ORM\Table(name="FileContent")
+ * @UniqueEntity(
+ *     fields={"phone", "grp"},
+ *     message="Ce numéro de téléphone existe déjà dans ce groupe."
+ * )
  */
 class FileContent
 {
@@ -28,6 +33,7 @@ class FileContent
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Assert\NotBlank(message="Le numéro de téléphone ne peut pas être vide.")
      */
     private $phone;
 

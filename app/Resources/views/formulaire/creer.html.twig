@@ -323,7 +323,7 @@
 $(document).ready(function() {
     const fields = ['phone', 'lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
     const existingFields = {'nom': 'lastname', 'prénom': 'firstname', 'firstname': 'firstname', 'lastname': 'lastname', 'last name': 'lastname', 'first name': 'firstname'};
-    const phoneVariations = ['phone', 'tel', 'tél'];
+    const phoneVariations = ['phone', 'tel', 'tél', 'telephon' , 'télephon', 'tèlephon', 'tèlèphon', 'teléphon' , 'telèphon'];
 
     function normalizeString(str) {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -343,7 +343,7 @@ $(document).ready(function() {
                 // Check for phone variations
                 if (phoneVariations.includes(value)) {
                     isValid = false;
-                    addError(input, 'Utilisez "Téléphone" qui existe déja à la place de "tel" or "tél".');
+                    addError(input, 'Utilisez "Téléphone" qui existe déja à la place de ses variantes.');
                 }
 
                 if (values[value]) {

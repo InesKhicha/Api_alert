@@ -66,7 +66,7 @@ class Formulaire
 
     /**
      * @ORM\ManyToOne(targetEntity="Groupe")
-     * @ORM\JoinColumn(name="id_groupe", referencedColumnName="id")
+     * @ORM\JoinColumn(name="id_groupe", referencedColumnName="id", nullable=false)
      */
     private $groupe;
 
