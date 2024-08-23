@@ -217,10 +217,12 @@
             </div>
             <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
                 {{ form_widget(form.firstname, {'attr': {'placeholder': 'Prénom', 'class': 'form-control'}}) }}
+
                 <button type="button" class="delete-field" data-field="firstname"><i class="fas fa-trash"></i></button>
             </div>
             <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
                 {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
+                {{ form_errors(form.lastname) }}
                 <button type="button" class="delete-field" data-field="lastname"><i class="fas fa-trash"></i></button>
             </div>
             {% for i in 1..4 %}
@@ -320,7 +322,7 @@
 <script>
 $(document).ready(function() {
     const fields = ['phone', 'lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
-    const existingFields = {'nom': 'lastname', 'prénom': 'firstname'};
+    const existingFields = {'nom': 'lastname', 'prénom': 'firstname', 'firstname': 'firstname', 'lastname': 'lastname', 'last name': 'lastname', 'first name': 'firstname'};
     const phoneVariations = ['phone', 'tel', 'tél'];
 
     function normalizeString(str) {
@@ -347,7 +349,7 @@ $(document).ready(function() {
                 if (values[value]) {
                     isValid = false;
                     addError(input, 'Duplicate value found.');
-                    addError($(`#field-${values[value]} input`), 'Duplicate value found.');
+                    addError($(`#field-${values[value]} input`), 'Attenttion Duplication de valeur.');
                 } else if (existingFields[value] && existingFields[value] !== field) {
                     isValid = false;
                     addError(input, `La valeur "${input.val()}" à déja un bouton existant.`);

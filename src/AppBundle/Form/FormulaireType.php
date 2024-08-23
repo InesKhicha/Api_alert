@@ -46,43 +46,40 @@ class FormulaireType extends AbstractType
     }
 
     public function validate($data, ExecutionContextInterface $context)
-    {
-        $fields = ['lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
-        $values = [];
-        $existingFields = ['nom' => 'lastname', 'name' => 'lastname', 'prénom' => 'firstname', 'prenom' => 'firstname', 'firstname' => 'firstname', 'first name' => 'firstname'];
+{
+    $fields = ['lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
+    $values = [];
+    $existingFields = ['nom' => 'lastname', 'prénom' => 'firstname' ];
 
-        // Variations of the phone field
-        $phoneVariations = ['phone', 'tel', 'tél', 'telephone', 'téléphone'];
+    $phoneVariations = ['phone', 'tel', 'tél', 'telephone', 'téléphone'];
 
-        foreach ($fields as $field) {
-            $value = $data->{'get'.ucfirst($field)}();
-            if ($value && $value !== $field) {  // Check if the value is not empty and not equal to the field name
-                $normalizedValue = $this->normalizeString($value);
+    foreach ($fields as $field) {
+        $value = $data->{'get'.ucfirst($field)}();
+        if ($value) {
+            $normalizedValue = $this->normalizeString($value);
 
-                // Check for phone variations
-                if (in_array($normalizedValue, array_map([$this, 'normalizeString'], $phoneVariations))) {
-                    $context->buildViolation('Utilisez le champ "Téléphone" existant.')
-                        ->atPath($field)
-                        ->addViolation();
-                    continue;
-                }
+            if (in_array($normalizedValue, array_map([$this, 'normalizeString'], $phoneVariations))) {
+                $context->buildViolation('Utilisez le champ "Téléphone" existant.')
+                    ->atPath($field)
+                    ->addViolation();
+                continue;
+            }
 
-                if (isset($values[$normalizedValue])) {
-                    $context->buildViolation('Duplication de la valeur : '.$value)
-                        ->atPath($field)
-                        ->addViolation();
-                    $context->buildViolation('Duplication de la valeur : '.$value)
-                        ->atPath($values[$normalizedValue])
-                        ->addViolation();
-                } elseif (isset($existingFields[$normalizedValue])) {
-                    $context->buildViolation('La valeur "' . $value . '" a déjà un bouton existant. Utilisez le bouton dédié.')
-                        ->atPath($field)
-                        ->addViolation();
-                } else {
-                    $values[$normalizedValue] = $field;
-                }
+            if (isset($values[$normalizedValue])) {
+                $context->buildViolation('Duplication de la valeur : '.$value)
+                    ->atPath($field)
+                    ->addViolation();
+                $context->buildViolation('Duplication de la valeur : '.$value)
+                    ->atPath($values[$normalizedValue])
+                    ->addViolation();
+            } elseif (isset($existingFields[$normalizedValue])) {
+                $context->buildViolation('La valeur "' . $value . '" a déjà un bouton existant. Utilisez le bouton dédié.')
+                    ->atPath($field)
+                    ->addViolation();
+            } else {
+                $values[$normalizedValue] = $field;
             }
         }
     }
-
+}
 }
