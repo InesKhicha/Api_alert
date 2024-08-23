@@ -46,40 +46,45 @@ class FormulaireType extends AbstractType
     }
 
     public function validate($data, ExecutionContextInterface $context)
-{
-    $fields = ['lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
-    $values = [];
-    $existingFields = ['nom' => 'lastname', 'prénom' => 'firstname' ];
-
-    $phoneVariations = ['phone', 'tel', 'tél', 'telephone', 'téléphone'];
-
-    foreach ($fields as $field) {
-        $value = $data->{'get'.ucfirst($field)}();
-        if ($value) {
-            $normalizedValue = $this->normalizeString($value);
-
-            if (in_array($normalizedValue, array_map([$this, 'normalizeString'], $phoneVariations))) {
-                $context->buildViolation('Utilisez le champ "Téléphone" existant.')
-                    ->atPath($field)
-                    ->addViolation();
-                continue;
-            }
-
-            if (isset($values[$normalizedValue])) {
-                $context->buildViolation('Duplication de la valeur : '.$value)
-                    ->atPath($field)
-                    ->addViolation();
-                $context->buildViolation('Duplication de la valeur : '.$value)
-                    ->atPath($values[$normalizedValue])
-                    ->addViolation();
-            } elseif (isset($existingFields[$normalizedValue])) {
-                $context->buildViolation('La valeur "' . $value . '" a déjà un bouton existant. Utilisez le bouton dédié.')
-                    ->atPath($field)
-                    ->addViolation();
-            } else {
-                $values[$normalizedValue] = $field;
+    {
+        $fields = ['lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
+        $values = [];
+        $existingFields = ['nom' => 'lastname', 'prénom' => 'firstname'];
+    
+        $phoneVariations = ['phone', 'tel', 'tél', 'telephone', 'téléphone'];
+    
+        foreach ($fields as $field) {
+            $value = $data->{'get'.ucfirst($field)}();
+            if ($value) {
+                $normalizedValue = $this->normalizeString($value);
+    
+                // Allow using "Nom" in the lastname field without triggering duplication
+                if ($normalizedValue === 'nom' && $field === 'lastname') {
+                    continue;
+                }
+    
+                if (in_array($normalizedValue, array_map([$this, 'normalizeString'], $phoneVariations))) {
+                    $context->buildViolation('Utilisez le champ "Téléphone" existant.')
+                        ->atPath($field)
+                        ->addViolation();
+                    continue;
+                }
+    
+                if (isset($values[$normalizedValue])) {
+                    $context->buildViolation('Duplication de la valeur : '.$value)
+                        ->atPath($field)
+                        ->addViolation();
+                    $context->buildViolation('Duplication de la valeur : '.$value)
+                        ->atPath($values[$normalizedValue])
+                        ->addViolation();
+                } elseif (isset($existingFields[$normalizedValue]) && $existingFields[$normalizedValue] !== $field) {
+                    $context->buildViolation('La valeur "' . $value . '" a déjà un bouton existant. Utilisez le bouton dédié.')
+                        ->atPath($field)
+                        ->addViolation();
+                } else {
+                    $values[$normalizedValue] = $field;
+                }
             }
         }
     }
-}
 }
