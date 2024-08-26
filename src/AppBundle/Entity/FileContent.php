@@ -99,10 +99,11 @@ class FileContent
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Groupe", inversedBy="fileContents")
-     * @ORM\JoinColumn(name="grp", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="Groupe", cascade={"persist"})
+     * @ORM\JoinColumn(name="id_groupe", referencedColumnName="id", nullable=false)
      */
     private $grp;
+
 
     /**
      * @ORM\Column(type="string", length=32, nullable=true)

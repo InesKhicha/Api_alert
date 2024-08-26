@@ -13,6 +13,7 @@ use AppBundle\Entity\FileContent;
 use AppBundle\Form\FileContentType;
 use AppBundle\Entity\Groupe;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Form\FormError;
 
 
 class FormulaireController extends Controller
@@ -87,39 +88,56 @@ class FormulaireController extends Controller
         ]);
     }
 
-  /**
-     * @Route("/formulaire/{code}", name="afficher_formulaire")
-     */
-    public function afficherFormulaireAction(Request $request, $code)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $formulaire = $em->getRepository('AppBundle:Formulaire')->findOneBy(['codeFormulaire' => $code]);
+/**
+ * @Route("/formulaire/{code}", name="afficher_formulaire")
+ */
+public function afficherFormulaireAction(Request $request, $code)
+{
+    $em = $this->getDoctrine()->getManager();
+    $formulaire = $em->getRepository('AppBundle:Formulaire')->findOneBy(['codeFormulaire' => $code]);
     
-        if (!$formulaire) {
-            throw $this->createNotFoundException('Formulaire non trouvé');
-        }
+    if (!$formulaire) {
+        throw $this->createNotFoundException('Formulaire non trouvé');
+    }
     
-        $fileContent = new FileContent();
-        $form = $this->createForm(FileContentType::class, $fileContent, ['formulaire' => $formulaire]);
+    $groupe = $formulaire->getGroupe();
+    $fileContent = new FileContent();
+    $form = $this->createForm(FileContentType::class, $fileContent, ['formulaire' => $formulaire]);
     
-        $form->handleRequest($request);
+    $form->handleRequest($request);
     
-        if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted() && $form->isValid()) {
+        // Vérifiez si le numéro de téléphone existe déjà dans le groupe
+        $existingContent = $em->getRepository('AppBundle:FileContent')->findOneBy([
+            'phone' => $fileContent->getPhone(),
+            'grp' => $groupe
+        ]);
+
+        if ($existingContent) {
+            // Ajoutez une erreur au formulaire
+            $form->get('phone')->addError(new FormError("Ce numéro de téléphone existe déjà dans ce groupe."));
+        } else {
+            $expiredCodes = $em->getRepository('AppBundle:CodeValide')->findBy(['expired' => true]);
+            foreach ($expiredCodes as $code) {
+                $em->remove($code);
+            }
+            $em->flush();
+            // Générer le code de validation
             $validationCode = mt_rand(100000, 999999);
             $phoneNumber = $fileContent->getPhone();
             $message = "Votre code de validation est : $validationCode";
-    
+
             $smsService = $this->get('app.sms_service');
             $response = $smsService->sendSms($phoneNumber, $message);
-    
+
             if (isset($response['success']) && $response['success']) {
                 $codeValide = new CodeValide();
                 $codeValide->setCode($validationCode);
                 $codeValide->setExpired(false);
                 $codeValide->setCreatedAt(new \DateTime());
                 $codeValide->setPhone($fileContent->getPhone());
-    
-                // Serialize form data to store in CodeValide
+
+                // Sérialiser les données du formulaire pour les stocker dans CodeValide
                 $dataToEncode = serialize([
                     'phone' => $fileContent->getPhone(),
                     'lastname' => $fileContent->getLastname(),
@@ -128,26 +146,26 @@ class FormulaireController extends Controller
                     'custom2' => $fileContent->getCustom2(),
                     'custom3' => $fileContent->getCustom3(),
                     'custom4' => $fileContent->getCustom4(),
-                    'grp' => $fileContent->getGrp()
+                    'grp' => $groupe->getId()
                 ]);
-    
-                $codeValide->setFormData($dataToEncode);  // Storing form data in CodeValide
-    
+
+                $codeValide->setFormData($dataToEncode);
                 $em->persist($codeValide);
                 $em->flush();
-    
+
                 return $this->redirectToRoute('validate_code', ['codeId' => $codeValide->getId()]);
             } else {
                 $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
-                $this->get('logger')->error('SMS sending failed', ['response' => $response]);
+                $this->get('logger')->error('SMS sending failed', ['response' => "response"]);
             }
         }
-    
-        return $this->render('formulaire/afficher.html.twig', [
-            'formulaire' => $formulaire,
-            'form' => $form->createView(),
-        ]);
     }
+
+    return $this->render('formulaire/afficher.html.twig', [
+        'formulaire' => $formulaire,
+        'form' => $form->createView(),
+    ]);
+}
 
     /**
      * @Route("/validate-code/{codeId}", name="validate_code")
@@ -162,7 +180,7 @@ class FormulaireController extends Controller
         if ($codeValide) {
             $fileContent = new FileContent();
             $formData = unserialize($codeValide->getFormData());
-    
+            
             if ($formData) {
                 $fileContent->setPhone($formData['phone']);
                 $fileContent->setLastname($formData['lastname']);
@@ -171,7 +189,11 @@ class FormulaireController extends Controller
                 $fileContent->setCustom2($formData['custom2']);
                 $fileContent->setCustom3($formData['custom3']);
                 $fileContent->setCustom4($formData['custom4']);
-                $fileContent->setGrp($formData['grp']);
+                $idgrp=$formData['grp'];
+                $groupe = $em->getRepository('AppBundle:Groupe')->find($idgrp);
+                $fileContent->setGrp($groupe);
+           
+           
             }
     
             if ($request->isMethod('POST')) {
@@ -184,6 +206,7 @@ class FormulaireController extends Controller
                 if ($minutes > 3 || ($minutes == 3 && $seconds > 0)) {
                     $codeValide->setExpired(true);
                     $em->flush();
+                    
                     $this->addFlash('error', 'Le code de validation a expiré.');
                 } elseif ($submittedCode == $codeValide->getCode()) {
                     $codeValide->setExpired(true);
@@ -239,6 +262,8 @@ class FormulaireController extends Controller
                             ->getRepository(Formulaire::class)
                             ->findBy(['groupe' => $groupe]);
 
+       
+
         return $this->render('formulaire/mes_formulaires.html.twig', [
             'formulaires' => $formulaires,
         ]);
@@ -256,10 +281,12 @@ public function supprimerFormulaireAction(Request $request, $id)
     if (!$formulaire) {
         return new JsonResponse(['status' => 'error', 'message' => 'Formulaire non trouvé'], 404);
     }
-
+   
     $em->remove($formulaire);
     $em->flush();
 
     return new JsonResponse(['status' => 'success', 'message' => 'Le formulaire a été supprimé avec succès.']);
 }
+
+
 }

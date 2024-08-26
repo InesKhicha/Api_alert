@@ -295,7 +295,7 @@ class SmsUser
         return $this->username;
     }
 
-    public function setUsername(string $username)
+    public function setUsername($username)
     {
         $this->username = $username;
         return $this;
@@ -306,7 +306,7 @@ class SmsUser
         return $this->usernameCanonical;
     }
 
-    public function setUsernameCanonical(string $usernameCanonical) 
+    public function setUsernameCanonical($usernameCanonical) 
     {
         $this->usernameCanonical = $usernameCanonical;
         return $this;
@@ -317,7 +317,7 @@ class SmsUser
         return $this->email;
     }
 
-    public function setEmail(string $email) 
+    public function setEmail($email) 
     {
         $this->email = $email;
         return $this;
@@ -328,7 +328,7 @@ class SmsUser
         return $this->emailCanonical;
     }
 
-    public function setEmailCanonical(string $emailCanonical) 
+    public function setEmailCanonical($emailCanonical) 
     {
         $this->emailCanonical = $emailCanonical;
         return $this;
@@ -339,7 +339,7 @@ class SmsUser
         return $this->enabled;
     }
 
-    public function setEnabled(bool $enabled) 
+    public function setEnabled($enabled) 
     {
         $this->enabled = $enabled;
         return $this;
@@ -350,7 +350,7 @@ class SmsUser
         return $this->salt;
     }
 
-    public function setSalt(string $salt) 
+    public function setSalt( $salt) 
     {
         $this->salt = $salt;
         return $this;
@@ -361,7 +361,7 @@ class SmsUser
         return $this->password;
     }
 
-    public function setPassword(string $password) 
+    public function setPassword( $password) 
     {
         $this->password = $password;
         return $this;
@@ -374,7 +374,7 @@ class SmsUser
         return $this->locked;
     }
 
-    public function setLocked(bool $locked) 
+    public function setLocked( $locked) 
     {
         $this->locked = $locked;
         return $this;
@@ -587,7 +587,7 @@ class SmsUser
         return $this->isEnabledWithPhone;
     }
 
-    public function setEnabledWithPhone(bool $isEnabledWithPhone) 
+    public function setEnabledWithPhone( $isEnabledWithPhone) 
     {
         $this->isEnabledWithPhone = $isEnabledWithPhone;
         return $this;
@@ -598,7 +598,7 @@ class SmsUser
         return $this->isCgvAccepted;
     }
 
-    public function setCgvAccepted(bool $isCgvAccepted) 
+    public function setCgvAccepted( $isCgvAccepted) 
     {
         $this->isCgvAccepted = $isCgvAccepted;
         return $this;
@@ -631,7 +631,7 @@ class SmsUser
         return $this->customerType;
     }
 
-    public function setCustomerType(int $customerType) 
+    public function setCustomerType( $customerType) 
     {
         $this->customerType = $customerType;
         return $this;
@@ -653,7 +653,7 @@ class SmsUser
         return $this->isBuyer;
     }
 
-    public function setBuyer(bool $isBuyer) 
+    public function setBuyer( $isBuyer) 
     {
         $this->isBuyer = $isBuyer;
         return $this;
@@ -675,7 +675,7 @@ class SmsUser
         return $this->isApiParentDisplay;
     }
 
-    public function setApiParentDisplay(bool $isApiParentDisplay) 
+    public function setApiParentDisplay( $isApiParentDisplay) 
     {
         $this->isApiParentDisplay = $isApiParentDisplay;
         return $this;
@@ -686,7 +686,7 @@ class SmsUser
         return $this->smscId;
     }
 
-    public function setSmscId(string $smscId) 
+    public function setSmscId( $smscId) 
     {
         $this->smscId = $smscId;
         return $this;
@@ -741,7 +741,7 @@ class SmsUser
         return $this->isMaxPaymentAuthorize;
     }
 
-    public function setMaxPaymentAuthorize(bool $isMaxPaymentAuthorize) 
+    public function setMaxPaymentAuthorize( $isMaxPaymentAuthorize) 
     {
         $this->isMaxPaymentAuthorize = $isMaxPaymentAuthorize;
         return $this;
@@ -752,7 +752,7 @@ class SmsUser
         return $this->useParentPhone;
     }
 
-    public function setUseParentPhone(bool $useParentPhone) 
+    public function setUseParentPhone( $useParentPhone) 
     {
         $this->useParentPhone = $useParentPhone;
         return $this;
@@ -763,7 +763,7 @@ class SmsUser
         return $this->useParentEmail;
     }
 
-    public function setUseParentEmail(bool $useParentEmail) 
+    public function setUseParentEmail( $useParentEmail) 
     {
         $this->useParentEmail = $useParentEmail;
         return $this;
@@ -785,7 +785,7 @@ class SmsUser
         return $this->createFrom;
     }
 
-    public function setCreateFrom(int $createFrom) 
+    public function setCreateFrom( $createFrom) 
     {
         $this->createFrom = $createFrom;
         return $this;
@@ -796,7 +796,7 @@ class SmsUser
         return $this->isModeDebug;
     }
 
-    public function setModeDebug(bool $isModeDebug) 
+    public function setModeDebug( $isModeDebug) 
     {
         $this->isModeDebug = $isModeDebug;
         return $this;
@@ -818,7 +818,7 @@ class SmsUser
         return $this->forceStopLc;
     }
 
-    public function setForceStopLc(bool $forceStopLc) 
+    public function setForceStopLc( $forceStopLc) 
     {
         $this->forceStopLc = $forceStopLc;
         return $this;
@@ -829,7 +829,7 @@ class SmsUser
         return $this->forceStopMarketing;
     }
 
-    public function setForceStopMarketing(bool $forceStopMarketing) 
+    public function setForceStopMarketing( $forceStopMarketing) 
     {
         $this->forceStopMarketing = $forceStopMarketing;
         return $this;
@@ -840,7 +840,7 @@ class SmsUser
         return $this->typeSubaccount;
     }
 
-    public function setTypeSubaccount(int $typeSubaccount) 
+    public function setTypeSubaccount( $typeSubaccount) 
     {
         $this->typeSubaccount = $typeSubaccount;
         return $this;
@@ -851,7 +851,7 @@ class SmsUser
         return $this->toDelete;
     }
 
-    public function setToDelete(bool $toDelete) 
+    public function setToDelete( $toDelete) 
     {
         $this->toDelete = $toDelete;
         return $this;
@@ -884,7 +884,7 @@ class SmsUser
         return $this->isNewsAccepted;
     }
 
-    public function setNewsAccepted(bool $isNewsAccepted) 
+    public function setNewsAccepted( $isNewsAccepted) 
     {
         $this->isNewsAccepted = $isNewsAccepted;
         return $this;
@@ -895,7 +895,7 @@ class SmsUser
         return $this->maxBulkSend;
     }
 
-    public function setMaxBulkSend(int $maxBulkSend) 
+    public function setMaxBulkSend( $maxBulkSend) 
     {
         $this->maxBulkSend = $maxBulkSend;
         return $this;
@@ -917,7 +917,7 @@ class SmsUser
         return $this->hasViewPopup;
     }
 
-    public function setHasViewPopup(bool $hasViewPopup) 
+    public function setHasViewPopup( $hasViewPopup) 
     {
         $this->hasViewPopup = $hasViewPopup;
         return $this;
@@ -928,7 +928,7 @@ class SmsUser
         return $this->isPostpayment;
     }
 
-    public function setPostpayment(bool $isPostpayment) 
+    public function setPostpayment( $isPostpayment) 
     {
         $this->isPostpayment = $isPostpayment;
         return $this;
@@ -939,7 +939,7 @@ class SmsUser
         return $this->local;
     }
 
-    public function setLocal(string $local) 
+    public function setLocal( $local) 
     {
         $this->local = $local;
         return $this;
@@ -961,7 +961,7 @@ class SmsUser
         return $this->hasIps;
     }
 
-    public function setHasIps(bool $hasIps) 
+    public function setHasIps( $hasIps) 
     {
         $this->hasIps = $hasIps;
         return $this;
@@ -972,7 +972,7 @@ class SmsUser
         return $this->hasMail2smsMail;
     }
 
-    public function setHasMail2smsMail(bool $hasMail2smsMail) 
+    public function setHasMail2smsMail( $hasMail2smsMail) 
     {
         $this->hasMail2smsMail = $hasMail2smsMail;
         return $this;
@@ -994,7 +994,7 @@ class SmsUser
         return $this->hasFlood;
     }
 
-    public function setHasFlood(bool $hasFlood) 
+    public function setHasFlood( $hasFlood) 
     {
         $this->hasFlood = $hasFlood;
         return $this;
@@ -1005,7 +1005,7 @@ class SmsUser
         return $this->hasSaSameParams;
     }
 
-    public function setHasSaSameParams(int $hasSaSameParams) 
+    public function setHasSaSameParams( $hasSaSameParams) 
     {
         $this->hasSaSameParams = $hasSaSameParams;
         return $this;
@@ -1016,7 +1016,7 @@ class SmsUser
         return $this->vosfacturesId;
     }
 
-    public function setVosfacturesId(int $vosfacturesId) 
+    public function setVosfacturesId( $vosfacturesId) 
     {
         $this->vosfacturesId = $vosfacturesId;
         return $this;
@@ -1027,7 +1027,7 @@ class SmsUser
         return $this->stopManage;
     }
 
-    public function setStopManage(bool $stopManage) 
+    public function setStopManage( $stopManage) 
     {
         $this->stopManage = $stopManage;
         return $this;
@@ -1038,7 +1038,7 @@ class SmsUser
         return $this->emailType;
     }
 
-    public function setEmailType(int $emailType) 
+    public function setEmailType( $emailType) 
     {
         $this->emailType = $emailType;
         return $this;
@@ -1049,7 +1049,7 @@ class SmsUser
         return $this->disableAntispamFilter;
     }
 
-    public function setDisableAntispamFilter(bool $disableAntispamFilter) 
+    public function setDisableAntispamFilter( $disableAntispamFilter) 
     {
         $this->disableAntispamFilter = $disableAntispamFilter;
         return $this;
@@ -1060,7 +1060,7 @@ class SmsUser
         return $this->twoFactorAuthentification;
     }
 
-    public function setTwoFactorAuthentification(bool $twoFactorAuthentification) 
+    public function setTwoFactorAuthentification( $twoFactorAuthentification) 
     {
         $this->twoFactorAuthentification = $twoFactorAuthentification;
         return $this;
@@ -1104,7 +1104,7 @@ class SmsUser
         return $this->webhookVersion;
     }
 
-    public function setWebhookVersion(int $webhookVersion) 
+    public function setWebhookVersion( $webhookVersion) 
     {
         $this->webhookVersion = $webhookVersion;
         return $this;
@@ -1137,7 +1137,7 @@ class SmsUser
         return $this->priority;
     }
 
-    public function setPriority(int $priority) 
+    public function setPriority( $priority) 
     {
         $this->priority = $priority;
         return $this;
@@ -1159,7 +1159,7 @@ class SmsUser
         return $this->hasExclude;
     }
 
-    public function setHasExclude(int $hasExclude) 
+    public function setHasExclude( $hasExclude) 
     {
         $this->hasExclude = $hasExclude;
         return $this;
@@ -1192,7 +1192,7 @@ class SmsUser
         return $this->routeType;
     }
 
-    public function setRouteType(int $routeType) 
+    public function setRouteType( $routeType) 
     {
         $this->routeType = $routeType;
         return $this;
@@ -1203,7 +1203,7 @@ class SmsUser
         return $this->hasRouteLc;
     }
 
-    public function setHasRouteLc(bool $hasRouteLc) 
+    public function setHasRouteLc( $hasRouteLc) 
     {
         $this->hasRouteLc = $hasRouteLc;
         return $this;
