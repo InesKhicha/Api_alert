@@ -107,7 +107,18 @@ public function afficherFormulaireAction(Request $request, $code)
     $form->handleRequest($request);
     
     if ($form->isSubmitted() && $form->isValid()) {
+        $countryCode = $form->get('country_code')->getData();
+        $phoneNumber = $form->get('phone')->getData();
+
+         // Trim only the leading zero if it exists
+    if (strpos($phoneNumber, '0') === 0) {
+        $formattedPhoneNumber = substr($phoneNumber, 1); // Remove the first character (leading zero)
+    } else {
+        $formattedPhoneNumber = $phoneNumber; // No leading zero to remove
+    }
+        $fullPhoneNumber = $countryCode . $formattedPhoneNumber;
         // Vérifiez si le numéro de téléphone existe déjà dans le groupe
+        $fileContent->setphone($fullPhoneNumber);
         $existingContent = $em->getRepository('AppBundle:FileContent')->findOneBy([
             'phone' => $fileContent->getPhone(),
             'grp' => $groupe

@@ -95,6 +95,13 @@
         {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
             {% if formulaire.phone is not null %}
             <div class="form-group">
+                <i class="fas fa-globe"></i>
+                {{ form_label(form.country_code, 'Indicatif international', {'label_attr': {'class': 'sr-only'}}) }}
+                {{ form_widget(form.country_code, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.country_code) }}
+            </div>
+
+            <div class="form-group">
                 <i class="fas fa-phone"></i>
                 {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'sr-only'}}) }}
                 {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone'}}) }}
