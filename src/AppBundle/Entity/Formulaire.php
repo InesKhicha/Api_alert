@@ -93,7 +93,7 @@ class Formulaire
 
     public function setCustom1($custom1)
     {
-        $this->custom1 = $custom1;
+        $this->custom1 = $this->capitalizeFirstLetter($custom1);
         return $this;
     }
 
@@ -104,7 +104,7 @@ class Formulaire
 
     public function setCustom2($custom2)
     {
-        $this->custom2 = $custom2;
+        $this->custom2 = $this->capitalizeFirstLetter($custom2);
         return $this;
     }
 
@@ -115,7 +115,7 @@ class Formulaire
 
     public function setCustom3($custom3)
     {
-        $this->custom3 = $custom3;
+        $this->custom3 = $this->capitalizeFirstLetter($custom3);
         return $this;
     }
 
@@ -126,7 +126,7 @@ class Formulaire
 
     public function setCustom4($custom4)
     {
-        $this->custom4 = $custom4;
+        $this->custom4 = $this->capitalizeFirstLetter($custom4);
         return $this;
     }
 
@@ -137,7 +137,7 @@ class Formulaire
 
     public function setNomFormulaire($nom_formulaire)
     {
-        $this->nom_formulaire = $nom_formulaire;
+        $this->nom_formulaire = $this->capitalizeFirstLetter($nom_formulaire);
         return $this;
     }
 
@@ -168,8 +168,7 @@ class Formulaire
     {
         return $this->lastname;
     }
-
-   
+    
     public function setLastname($lastname)
     {
         $this->lastname = $lastname;
@@ -189,5 +188,10 @@ class Formulaire
         $this->firstname = $firstname;
 
         return $this;
+    }
+
+    public function capitalizeFirstLetter($string)
+    {
+        return ucwords(strtolower($string));
     }
 }
