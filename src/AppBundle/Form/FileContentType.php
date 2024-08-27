@@ -1,6 +1,5 @@
 <?php
 // src/AppBundle/Form/FileContentType.php
-// src/AppBundle/Form/FileContentType.php
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -9,7 +8,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 class FileContentType extends AbstractType
 {
@@ -17,24 +15,36 @@ class FileContentType extends AbstractType
     {
         $formulaire = $options['formulaire'];
 
+        // Liste des pays avec leurs indicatifs
+        $countryChoices = [
+            '+33' => 'France (+33)',
+            '+32' => 'Belgique (+32)',
+            '+41' => 'Suisse (+41)',
+            '+352' => 'Luxembourg (+352)',
+            '+49' => 'Allemagne (+49)',
+            '+39' => 'Italie (+39)',
+            '+34' => 'Espagne (+34)',
+            '+44' => 'Royaume-Uni (+44)',
+            '+212' => 'Maroc (+212)',
+            '+213' => 'Algérie (+213)',
+            '+216' => 'Tunisie (+216)',
+            '+221' => 'Sénégal (+221)',
+            '+225' => 'Côte d\'Ivoire (+225)',
+            '+1' => 'Canada (+1)',
+            '+86' => 'Chine (+86)',
+            '+91' => 'Inde (+91)',
+            '+81' => 'Japon (+81)',
+            '+61' => 'Australie (+61)',
+            '+55' => 'Brésil (+55)',
+            // Ajoutez d'autres pays ici
+        ];
+
+        // Trier les pays par ordre alphabétique de leurs noms
+        asort($countryChoices);
+
         $builder
         ->add('country_code', ChoiceType::class, [
-            'choices' => [
-                '+33' => 'France (+33)',
-                '+32' => 'Belgique (+32)',
-                '+41' => 'Suisse (+41)',
-                '+352' => 'Luxembourg (+352)',
-                '+49' => 'Allemagne (+49)',
-                '+39' => 'Italie (+39)',
-                '+34' => 'Espagne (+34)',
-                '+44' => 'Royaume-Uni (+44)',
-                '+212' => 'Maroc (+212)',
-                '+213' => 'Algérie (+213)',
-                '+216' => 'Tunisie (+216)',
-                '+221' => 'Sénégal (+221)',
-                '+225' => 'Côte d\'Ivoire (+225)',
-                '+1' => 'Canada (+1)',
-            ],
+            'choices' => $countryChoices,
             'data' => '+33', // Par défaut sur la France
             'required' => true,
             'mapped' => false,
@@ -50,7 +60,7 @@ class FileContentType extends AbstractType
                     'callback' => function($object, $context) {
                         $countryCode = $context->getRoot()->get('country_code')->getData();
                         $phone = $object;
-                        
+
                         switch ($countryCode) {
                             case '+33': // France
                                 if (!preg_match('/^0?[1-9][0-9]{8}$/', $phone)) {
@@ -106,6 +116,36 @@ class FileContentType extends AbstractType
                                         ->addViolation();
                                 }
                                 break;
+                            case '+86': // Chine
+                                if (!preg_match('/^[1-9]\d{10}$/', $phone)) {
+                                    $context->buildViolation('Veuillez entrer un numéro de téléphone chinois valide (ex: 13800138000).')
+                                        ->addViolation();
+                                }
+                                break;
+                            case '+91': // Inde
+                                if (!preg_match('/^[6-9]\d{9}$/', $phone)) {
+                                    $context->buildViolation('Veuillez entrer un numéro de téléphone indien valide (ex: 9123456789).')
+                                        ->addViolation();
+                                }
+                                break;
+                            case '+81': // Japon
+                                if (!preg_match('/^[1-9]\d{8,9}$/', $phone)) {
+                                    $context->buildViolation('Veuillez entrer un numéro de téléphone japonais valide (ex: 09012345678).')
+                                        ->addViolation();
+                                }
+                                break;
+                            case '+61': // Australie
+                                if (!preg_match('/^0?[2-478][0-9]{8}$/', $phone)) {
+                                    $context->buildViolation('Veuillez entrer un numéro de téléphone australien valide (ex: 0412345678).')
+                                        ->addViolation();
+                                }
+                                break;
+                            case '+55': // Brésil
+                                if (!preg_match('/^[1-9]\d{9}$/', $phone)) {
+                                    $context->buildViolation('Veuillez entrer un numéro de téléphone brésilien valide (ex: 11987654321).')
+                                        ->addViolation();
+                                }
+                                break;
                             default:
                                 if (!preg_match('/^[0-9]{6,14}$/', $phone)) {
                                     $context->buildViolation('Veuillez entrer un numéro de téléphone valide (6 à 14 chiffres).')
@@ -117,35 +157,35 @@ class FileContentType extends AbstractType
             ],
             'label' => 'Numéro de téléphone',
         ]);
-       
-            if ($formulaire->getLastname()) {
-                $builder->add('lastname', TextType::class, [
-                    'label' => $formulaire->getLastname(),
-                    'required' => false,
-                    'constraints' => [
-                        new Assert\Length([
-                            'max' => 255,
-                            'maxMessage' => 'Le champ ne peut pas dépasser {{ limit }} caractères.',
-                        ]),
-                    ],
-                ]);
-            }
+        
+        // Ajoutez les champs personnalisés
+        if ($formulaire->getLastname()) {
+            $builder->add('lastname', TextType::class, [
+                'label' => $formulaire->getLastname(),
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => 255,
+                        'maxMessage' => 'Le champ ne peut pas dépasser {{ limit }} caractères.',
+                    ]),
+                ],
+            ]);
+        }
 
-            if ($formulaire->getFirstname()) {
-                $builder->add('firstname', TextType::class, [
-                    'label' => $formulaire->getFirstname(),
-                    'required' => false,
-                    'constraints' => [
-                        new Assert\Length([
-                            'max' => 255,
-                            'maxMessage' => 'Le champ ne peut pas dépasser {{ limit }} caractères.',
-                        ]),
-                    ],
-                ]);
-            }
+        if ($formulaire->getFirstname()) {
+            $builder->add('firstname', TextType::class, [
+                'label' => $formulaire->getFirstname(),
+                'required' => false,
+                'constraints' => [
+                    new Assert\Length([
+                        'max' => 255,
+                        'maxMessage' => 'Le champ ne peut pas dépasser {{ limit }} caractères.',
+                    ]),
+                ],
+            ]);
+        }
 
-
-            if ($formulaire->getCustom1()) {
+        if ($formulaire->getCustom1()) {
             $builder->add('custom1', TextType::class, [
                 'label' => $formulaire->getCustom1(),
                 'required' => false,

@@ -1,4 +1,5 @@
-{# app/Resources/views/formulaire/afficher.html.twig #}
+{# app/Resources/views/form/file_content.html.twig #}
+
 {% extends 'base.html.twig' %}
 
 {% block stylesheets %}
@@ -39,6 +40,7 @@
         }
         .form-group {
             margin-bottom: 25px;
+            position: relative;
         }
         label {
             font-weight: 500;
@@ -48,8 +50,9 @@
             border: none;
             border-bottom: 2px solid #ddd;
             border-radius: 0;
-            padding: 10px 5px;
+            padding: 10px 5px 10px 35px;
             transition: all 0.3s ease;
+            width: 100%;
         }
         .form-control:focus {
             box-shadow: none;
@@ -68,22 +71,56 @@
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
-        .form-group {
+        .phone-group {
+            display: flex;
+            align-items: stretch;
+        }
+        .country-code {
+            width: 250px;
+            margin-right: 10px;
             position: relative;
-            margin-bottom: 35px;
         }
-        .form-group i {
+        .phone-number {
+            flex-grow: 1;
+            position: relative;
+        }
+        .form-group i, .country-code i, .phone-number i {
             position: absolute;
-            top: 15px;
-            left: 0;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
             color: #00B6B7;
+            z-index: 1;
         }
-        .form-control {
-            padding-left: 30px;
+        .country-code select, .phone-number input {
+            padding-left: 35px;
+            height: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: transparent;
+        }
+        .country-code select {
+            padding-right: 30px;
+        }
+        .country-code::after {
+            content: '\f0d7';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #00B6B7;
         }
         .invalid-feedback {
             color: #ff4757;
             font-size: 0.875em;
+        }
+        .flag-icon {
+            font-size: 1.2em;
+            margin-right: 5px;
         }
     </style>
 {% endblock %}
@@ -94,18 +131,17 @@
 
         {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
             {% if formulaire.phone is not null %}
-            <div class="form-group">
-                <i class="fas fa-globe"></i>
-                {{ form_label(form.country_code, 'Indicatif international', {'label_attr': {'class': 'sr-only'}}) }}
-                {{ form_widget(form.country_code, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(form.country_code) }}
-            </div>
-
-            <div class="form-group">
-                <i class="fas fa-phone"></i>
-                {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'sr-only'}}) }}
-                {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone'}}) }}
-                {{ form_errors(form.phone) }}
+            <div class="form-group phone-group">
+                <div class="country-code">
+                    <i class="fas fa-flag flag-icon"></i>
+                    {{ form_widget(form.country_code, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.country_code) }}
+                </div>
+                <div class="phone-number">
+                    <i class="fas fa-phone"></i>
+                    {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone'}}) }}
+                    {{ form_errors(form.phone) }}
+                </div>
             </div>
             {% endif %}
 
