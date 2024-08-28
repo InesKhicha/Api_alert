@@ -19,60 +19,86 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class FormulaireController extends Controller
 {
-    /**
-     * @Route("/creer-formulaire", name="creer_formulaire")
-     */
-    public function creerFormulaireAction(Request $request)
-    {
-        $formulaire = new Formulaire();
+ /**
+ * @Route("/creer-formulaire", name="creer_formulaire")
+ */
+public function creerFormulaireAction(Request $request)
+{
+    $formulaire = new Formulaire();
 
-        // Récupérer le client via l'API key (simulation avec un paramètre query string 'api_key')
-       
-        $smsUser = $this->getDoctrine()
-                       ->getRepository('AppBundle:SmsUser')
-                       ->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
+    // Récupérer le client via l'API key (simulation avec un paramètre query string 'api_key')
+    $smsUser = $this->getDoctrine()
+                   ->getRepository('AppBundle:SmsUser')
+                   ->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
 
-                       if (!$smsUser) {
-                        throw $this->createNotFoundException('SmsUser non trouvé.');
-                    }
-                
-                    $userId = $smsUser->getId(); // Récupérer l'ID de l'utilisateur SmsUser
-                
-                    $id = 1; // Remplacer par l'ID du groupe que vous souhaitez récupérer
-                
-                    $groupeRepository = $this->getDoctrine()->getRepository(Groupe::class);
-                
-                    // Appeler la méthode pour trouver le groupe
-                    $groupe = $groupeRepository->findOneBy([
-                        'id' => $id,
-                        'user' => $smsUser // Utiliser l'objet SmsUser directement
-                    ]);
-                
-                    if (!$groupe) {
-                        // Gérer le cas où le groupe n'est pas trouvé
-                        throw $this->createNotFoundException('Groupe not found.');
-                    }
-        $form = $this->createForm(FormulaireType::class, $formulaire);
+    if (!$smsUser) {
+        throw $this->createNotFoundException('SmsUser non trouvé.');
+    }
 
-        $form->handleRequest($request);
+    $userId = $smsUser->getId();
+    $id = 1; // Remplacer par l'ID du groupe que vous souhaitez récupérer
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Check if lastname and firstname are set to default values
+    $groupeRepository = $this->getDoctrine()->getRepository(Groupe::class);
+    $groupe = $groupeRepository->findOneBy([
+        'id' => $id,
+        'user' => $smsUser 
+    ]);
+
+    if (!$groupe) {
+        throw $this->createNotFoundException('Groupe non trouvé.');
+    }
+
+    $form = $this->createForm(FormulaireType::class, $formulaire);
+
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $errors = [];
+
+        // Normalisation et validation des champs
+        $normalizedFields = [];
+        $phoneVariations = ['phone', 'tel', 'tél', 'telephon', 'télephon', 'tèlephon', 'tèlèphon', 'teléphon', 'telèphon'];
+        $existingFields = ['nom' => 'lastname', 'prénom' => 'firstname', 'firstname' => 'firstname', 'lastname' => 'lastname'];
+
+        // Normalisation des noms de champs
+        foreach (['phone', 'lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'] as $field) {
+            $value = $formulaire->{'get'.ucfirst($field)}();
+            if ($value) {
+                $normalizedValue = $this->normalizeString($value);
+                if (in_array($normalizedValue, $phoneVariations)) {
+                    $errors[] = "Utilisez 'Téléphone' qui existe déjà à la place de ses variantes.";
+                }
+
+                if (isset($normalizedFields[$normalizedValue])) {
+                    $errors[] = "Duplication du champ : ". $value;
+                }
+
+                if (isset($existingFields[$normalizedValue]) && $existingFields[$normalizedValue] !== $field) {
+                    $errors[] = "La valeur '$value' correspond déjà à un autre champ existant.";
+                } else {
+                    $normalizedFields[$normalizedValue] = $field;
+                }
+            }
+        }
+
+        if (count($errors) > 0) {
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error);
+            }
+        } else {
+            // Gestion spécifique des champs 'Nom' et 'Prénom'
             if ($formulaire->getLastname() === 'Nom') {
-                // Only set to 'Nom' if button has been clicked
                 $formulaire->setLastname('Nom');
             } else {
-                // Here we set it to null if not clicked
                 $formulaire->setLastname(null);
             }
-        
+
             if ($formulaire->getFirstname() === 'Prénom') {
-                // Only set to 'Prénom' if button has been clicked
                 $formulaire->setFirstname('Prénom');
             } else {
-                // Here we set it to null if not clicked
                 $formulaire->setFirstname(null);
             }
+
             $codeFormulaire = bin2hex(random_bytes(10));
             $formulaire->setCodeFormulaire($codeFormulaire);
             $formulaire->setGroupe($groupe);
@@ -83,11 +109,17 @@ class FormulaireController extends Controller
 
             return $this->redirectToRoute('mes_formulaires');
         }
-
-        return $this->render('formulaire/creer.html.twig', [
-            'form' => $form->createView(),
-        ]);
     }
+
+    return $this->render('formulaire/creer.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+
+private function normalizeString($str)
+{
+    return strtolower(preg_replace('/[\x{0300}-\x{036f}]/u', '', \Normalizer::normalize($str, \Normalizer::FORM_D)));
+}
 
 /**
  * @Route("/formulaire/{code}", name="afficher_formulaire")
