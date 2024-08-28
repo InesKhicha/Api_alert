@@ -216,10 +216,10 @@ public function afficherFormulaireAction(Request $request, $code)
                 $minutes = $interval->i;
                 $seconds = $interval->s;
     
-                if ($minutes > 3 || ($minutes == 3 && $seconds > 0)) {
+                if ($minutes > 5 || ($minutes == 5 && $seconds > 0)) {
                     $codeValide->setExpired(true);
                     $em->flush();
-                    if ($minutes > 3 || ($minutes == 3 && $seconds > 0 && $codeValide->isExpired())) {
+                    if ($minutes > 5 || ($minutes == 5 && $seconds > 0 && $codeValide->isExpired())) {
                         $this->addFlash('error', 'Le code de validation a expiré.');
                     } else {
                         $this->addFlash('error', 'Code de validation incorrect.');

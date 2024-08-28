@@ -140,7 +140,7 @@
             </form>
 
             <div class="countdown-container">
-                <p>Le code expirera dans <span id="countdown">03:00</span> minutes.</p>
+                <p>Le code expirera dans <span id="countdown">05:00</span> minutes.</p>
             </div>
         {% endif %}
     </div>
@@ -148,7 +148,7 @@
     {% if showResendButton is not defined or not showResendButton %}
         <script>
             // Set the initial countdown time
-            var initialTime = 180; // 3 minutes in seconds
+            var initialTime = 300; // 3 minutes in seconds
 
             // Check if there's a saved countdown in localStorage
             var savedTimeLeft = localStorage.getItem('timeLeft');
