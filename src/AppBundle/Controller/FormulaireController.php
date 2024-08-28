@@ -3,17 +3,18 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Client;
-use AppBundle\Entity\Formulaire;
-use AppBundle\Form\FormulaireType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use AppBundle\Entity\CodeValide;
-use AppBundle\Entity\FileContent;
-use AppBundle\Form\FileContentType;
 use AppBundle\Entity\Groupe;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use AppBundle\Entity\CodeValide;
+use AppBundle\Entity\Formulaire;
+use AppBundle\Entity\FileContent;
+use AppBundle\Form\FormulaireType;
+use AppBundle\Form\FileContentType;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Request;
+use AppBundle\Repository\CodeValideRepository; 
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 
 class FormulaireController extends Controller
@@ -186,7 +187,8 @@ public function afficherFormulaireAction(Request $request, $code)
         $submittedCode = $request->request->get('validation_code');
         $em = $this->getDoctrine()->getManager();
     
-        $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
+           // Ensure the correct repository method is called
+           $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
     
         if ($codeValide) {
             $fileContent = new FileContent();
@@ -217,6 +219,17 @@ public function afficherFormulaireAction(Request $request, $code)
                 if ($minutes > 3 || ($minutes == 3 && $seconds > 0)) {
                     $codeValide->setExpired(true);
                     $em->flush();
+                    if ($minutes > 3 || ($minutes == 3 && $seconds > 0 && $codeValide->isExpired())) {
+                        $this->addFlash('error', 'Le code de validation a expiré.');
+                    } else {
+                        $this->addFlash('error', 'Code de validation incorrect.');
+                    }
+                
+                    // Affiche le bouton "Renvoyer le code"
+                    return $this->render('formulaire/validate_code.html.twig', [
+                        'codeId' => $codeId,
+                        'showResendButton' => true, // On passe cette variable au template
+                    ]);
                     
                     $this->addFlash('error', 'Le code de validation a expiré.');
                 } elseif ($submittedCode == $codeValide->getCode()) {
@@ -227,19 +240,56 @@ public function afficherFormulaireAction(Request $request, $code)
                         $em->persist($fileContent);
                         $em->flush();
     
-                        $this->addFlash('success', 'Inscription réussie !');
                         return $this->redirectToRoute('homepage');
                     }
                 } else {
-                    $this->addFlash('error', 'Code de validation incorrect.');
+                    $this->addFlash('error', 'Code de validation incorrect ou expiré.');
                 }
             }
+        }else {
+            $this->addFlash('error', 'Code de validation incorrect ou expiré.');
         }
     
         return $this->render('formulaire/validate_code.html.twig', [
             'codeId' => $codeId,
         ]);
     }
+
+    // Ajouter une route pour renvoyer le code
+/**
+ * @Route("/resend-code/{codeId}", name="resend_code")
+ */
+public function resendCodeAction($codeId)
+{
+    $em = $this->getDoctrine()->getManager();
+    $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
+
+    if ($codeValide) {
+        $newValidationCode = mt_rand(100000, 999999);
+        $phoneNumber = $codeValide->getPhone();
+        $message = "Votre nouveau code de validation est : $newValidationCode";
+
+        $smsService = $this->get('app.sms_service');
+        $response = $smsService->sendSms($phoneNumber, $message);
+
+        if (isset($response['success']) && $response['success']) {
+            // Mettre à jour le code existant
+            $codeValide->setCode($newValidationCode);
+            $codeValide->setCreatedAt(new \DateTime());
+            $codeValide->setExpired(false);
+            $em->flush();
+
+            $this->addFlash('success', 'Un nouveau code de validation a été envoyé.');
+        } else {
+            $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
+        }
+    } else {
+        $this->addFlash('error', 'Impossible de renvoyer le code.');
+    }
+
+    return $this->redirectToRoute('validate_code', ['codeId' => $codeId]);
+}
+
    /**
      * @Route("/mes-formulaires", name="mes_formulaires")
      */

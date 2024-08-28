@@ -115,55 +115,75 @@
             {% endfor %}
         {% endfor %}
 
-        <form method="post">
-            <div class="form-group">
-                <label for="validation_code">Code de validation</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+        {% if showResendButton is defined and showResendButton %}
+            <div class="text-center">
+                <a href="{{ path('resend_code', {'codeId': codeId}) }}" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i> Renvoyer le code
+                </a>
+            </div>
+        {% else %}
+            <form method="post">
+                <div class="form-group">
+                    <label for="validation_code">Code de validation</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        </div>
+                        <input type="text" name="validation_code" id="validation_code" class="form-control" required>
                     </div>
-                    <input type="text" name="validation_code" id="validation_code" class="form-control" required >
                 </div>
-            </div>
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-check mr-2"></i>Valider
-                </button>
-            </div>
-        </form>
+                <div class="form-group text-center">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check mr-2"></i>Valider
+                    </button>
+                </div>
+            </form>
 
-        <div class="countdown-container">
-            <p>Le code expirera dans <span id="countdown">03:00</span> minutes.</p>
-        </div>
+            <div class="countdown-container">
+                <p>Le code expirera dans <span id="countdown">03:00</span> minutes.</p>
+            </div>
+        {% endif %}
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
-    <script>
-        // Countdown timer
-        var countdownElement = document.getElementById('countdown');
-        var timeLeft = 180; // 3 minutes in seconds
+    {% if showResendButton is not defined or not showResendButton %}
+        <script>
+            // Set the initial countdown time
+            var initialTime = 180; // 3 minutes in seconds
 
-        var countdownTimer = setInterval(function() {
-            var minutes = Math.floor(timeLeft / 60);
-            var seconds = timeLeft % 60;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
-            countdownElement.textContent = minutes + ':' + seconds;
-            timeLeft--;
-
-            if (timeLeft < 0) {
-                clearInterval(countdownTimer);
-                countdownElement.textContent = '00:00';
-                alert('Le code de validation a expiré.');
+            // Check if there's a saved countdown in localStorage
+            var savedTimeLeft = localStorage.getItem('timeLeft');
+            var timeLeft = savedTimeLeft ? parseInt(savedTimeLeft) : initialTime;
+            
+            // Update the countdown display
+            function updateCountdownDisplay() {
+                var minutes = Math.floor(timeLeft / 60);
+                var seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                document.getElementById('countdown').textContent = minutes + ':' + seconds;
             }
-        }, 1000);
 
-        // Animations
-        document.addEventListener('DOMContentLoaded', (event) => {
-            gsap.from('.container', {duration: 1, y: 50, opacity: 0, ease: 'power3.out'});
-            gsap.from('h2', {duration: 1, y: -20, opacity: 0, ease: 'power3.out', delay: 0.2});
-            gsap.from('.form-group', {duration: 0.8, y: 20, opacity: 0, ease: 'power3.out', stagger: 0.1, delay: 0.4});
-            gsap.from('.btn-primary', {duration: 0.8, scale: 0.8, opacity: 0, ease: 'back.out(1.7)', delay: 0.6});
-            gsap.from('.countdown-container', {duration: 0.8, y: 20, opacity: 0, ease: 'power3.out', delay: 0.8});
-        });
-    </script>
+            // Start the countdown timer
+            var countdownTimer = setInterval(function() {
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    document.getElementById('countdown').textContent = '00:00';
+                    alert('Le code de validation a expiré.');
+                    localStorage.removeItem('timeLeft'); // Clear the saved time
+                    document.querySelector('.countdown-container').innerHTML = '<a href="{{ path('resend_code', {'codeId': codeId}) }}" class="btn btn-secondary"><i class="fas fa-redo"></i> Renvoyer le code</a>';
+                } else {
+                    timeLeft--;
+                    updateCountdownDisplay();
+                    localStorage.setItem('timeLeft', timeLeft); // Save the time left
+                }
+            }, 1000);
+
+            // Initialize the countdown display
+            updateCountdownDisplay();
+
+            // Clear localStorage when the form is submitted
+            document.querySelector('form').addEventListener('submit', function() {
+                localStorage.removeItem('timeLeft');
+            });
+        </script>
+    {% endif %}
 {% endblock %}
