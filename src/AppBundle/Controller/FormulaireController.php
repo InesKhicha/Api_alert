@@ -142,6 +142,7 @@ public function afficherFormulaireAction(Request $request, $code)
     if ($form->isSubmitted() && $form->isValid()) {
         $countryCode = $form->get('country_code')->getData();
         $phoneNumber = $form->get('phone')->getData();
+        $action = $request->request->get('action');
 
          // Trim only the leading zero if it exists
     if (strpos($phoneNumber, '0') === 0) {
@@ -157,10 +158,18 @@ public function afficherFormulaireAction(Request $request, $code)
             'grp' => $groupe
         ]);
 
-        if ($existingContent) {
+
+
+        if ($existingContent && $action === 'inscription' ) {
             // Ajoutez une erreur au formulaire
             $form->get('phone')->addError(new FormError("Ce numéro de téléphone existe déjà dans ce groupe."));
-        } else {
+            
+        }elseif(!$existingContent && $action === 'desinscription' ) {
+            // Ajoutez une erreur au formulaire
+            $form->get('phone')->addError(new FormError("Vous etes pas inscrit avec ce numéro dans ce groupe."));
+            
+        } 
+        else {
             $expiredCodes = $em->getRepository('AppBundle:CodeValide')->findBy(['expired' => true]);
             foreach ($expiredCodes as $code) {
                 $em->remove($code);
@@ -190,7 +199,8 @@ public function afficherFormulaireAction(Request $request, $code)
                     'custom2' => $fileContent->getCustom2(),
                     'custom3' => $fileContent->getCustom3(),
                     'custom4' => $fileContent->getCustom4(),
-                    'grp' => $groupe->getId()
+                    'grp' => $groupe->getId(),
+                    'action' => $action // Ajouter l'action au tableau 
                 ]);
 
                 $codeValide->setFormData($dataToEncode);
@@ -235,6 +245,7 @@ public function afficherFormulaireAction(Request $request, $code)
                 $fileContent->setCustom3($formData['custom3']);
                 $fileContent->setCustom4($formData['custom4']);
                 $idgrp=$formData['grp'];
+                $action=$formData['action'];
                 $groupe = $em->getRepository('AppBundle:Groupe')->find($idgrp);
                 $fileContent->setGrp($groupe);
            
@@ -248,10 +259,10 @@ public function afficherFormulaireAction(Request $request, $code)
                 $minutes = $interval->i;
                 $seconds = $interval->s;
     
-                if ($minutes > 5 || ($minutes == 5 && $seconds > 0)) {
+                if ($minutes > 5 || ($minutes == 5 && $seconds > 0 )) {
                     $codeValide->setExpired(true);
                     $em->flush();
-                    if ($minutes > 5 || ($minutes == 5 && $seconds > 0 && $codeValide->isExpired())) {
+                    if ($minutes > 5 || ($minutes == 5 && $seconds > 0 ) && ($codeValide->isExpired())) {
                         $this->addFlash('error', 'Le code de validation a expiré.');
                     } else {
                         $this->addFlash('error', 'Code de validation incorrect.');
@@ -268,12 +279,24 @@ public function afficherFormulaireAction(Request $request, $code)
                     $codeValide->setExpired(true);
                     $em->flush();
     
-                    if ($formData) {
+                    if ($formData && $action==='inscription' ) {
                         $em->persist($fileContent);
                         $em->flush();
     
                         return $this->redirectToRoute('homepage');
                     }
+                    elseif($formData && $action === 'desinscription' ) {
+                        $fileContentRM = new FileContent();
+                        $fileContentRM = $em->getRepository('AppBundle:FileContent')->findOneBy([
+                            'phone' => $fileContent->getPhone(),
+                            'grp' => $fileContent->getGrp()
+                        ]);
+
+                            $em->remove($fileContentRM);
+                            $em->flush();
+                            return $this->redirectToRoute('desinscription_success');
+                        
+                    }else{$this->addFlash('error', 'Pas de données recupéré.');}
                 } else {
                     $this->addFlash('error', 'Code de validation incorrect ou expiré.');
                 }
@@ -286,7 +309,13 @@ public function afficherFormulaireAction(Request $request, $code)
             'codeId' => $codeId,
         ]);
     }
-
+/**
+ * @Route("/desinscription-success", name="desinscription_success")
+ */
+public function desinscriptionSuccessAction()
+{
+    return $this->render('formulaire/desinscription_success.html.twig');
+}
     // Ajouter une route pour renvoyer le code
 /**
  * @Route("/resend-code/{codeId}", name="resend_code")

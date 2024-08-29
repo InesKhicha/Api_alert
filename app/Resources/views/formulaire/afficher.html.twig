@@ -71,6 +71,19 @@
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+        .btn-danger {
+            background-color: #db2e29;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            background-color: #e6110a;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
         .phone-group {
             display: flex;
             align-items: stretch;
@@ -131,6 +144,7 @@
 
         {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
             {% if formulaire.phone is not null %}
+           <div class="form-group"> 
             <div class="form-group phone-group">
                 <div class="country-code">
                     <i class="fas fa-flag flag-icon"></i>
@@ -138,11 +152,15 @@
                     {{ form_errors(form.country_code) }}
                 </div>
                 <div class="phone-number">
-                    <i class="fas fa-phone"></i>
-                    {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone'}}) }}
-                    {{ form_errors(form.phone) }}
+                    <i class="fas fa-phone"  ></i>
+                    {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': 'Téléphone','required': 'required'}}) }}
+                    
                 </div>
+                
             </div>
+             {{ form_errors(form.phone) }}
+            </div>
+            
             {% endif %}
 
             {% if formulaire.lastname is not null %}
@@ -175,9 +193,11 @@
                 {% endif %}
             {% endfor %}
 
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary">Soumettre</button>
-            </div>
+           <div class="form-group text-center">
+        <button type="submit" name="action" value="desinscription" class="btn btn-danger mr-2">Désinscription</button>
+        <button type="submit" name="action" value="inscription" class="btn btn-primary mr-2">Inscription</button>
+       
+    </div>
         {{ form_end(form) }}
     </div>
 {% endblock %}
@@ -192,14 +212,8 @@
             gsap.from('.form-group', {duration: 0.8, y: 20, opacity: 0, ease: 'power3.out', stagger: 0.1, delay: 0.4});
             gsap.from('.btn-primary', {duration: 0.8, scale: 0.8, opacity: 0, ease: 'back.out(1.7)', delay: 1});
 
-            const form = document.querySelector('form');
-            form.addEventListener('submit', function(event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
+
         });
     </script>
+    
 {% endblock %}

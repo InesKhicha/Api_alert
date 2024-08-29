@@ -53,14 +53,11 @@ class FileContentType extends AbstractType
         ->add('phone', TextType::class, [
             'required' => true,
             'constraints' => [
-                new Assert\NotBlank([
-                    'message' => 'Veuillez entrer un numéro de téléphone.',
-                ]),
                 new Assert\Callback([
                     'callback' => function($object, $context) {
                         $countryCode = $context->getRoot()->get('country_code')->getData();
                         $phone = $object;
-
+                        if (!empty($phone)){
                         switch ($countryCode) {
                             case '+33': // France
                                 if (!preg_match('/^0?[1-9][0-9]{8}$/', $phone)) {
@@ -151,7 +148,7 @@ class FileContentType extends AbstractType
                                     $context->buildViolation('Veuillez entrer un numéro de téléphone valide (6 à 14 chiffres).')
                                         ->addViolation();
                                 }
-                        }
+                        }}
                     },
                 ]),
             ],
