@@ -30,6 +30,7 @@
             transition: all 0.5s ease;
             box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
         }
+
         .sidebar h4 {
             color: #fff;
             margin-bottom: 30px;
@@ -37,6 +38,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .sidebar .card {
             background-color: #fff;
             border: none;
@@ -47,29 +49,35 @@
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             overflow: hidden;
         }
+
         .sidebar .card:hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
+
         .sidebar .card .card-body {
             padding: 20px;
             display: flex;
             align-items: center;
         }
+
         .sidebar .card .card-body i {
             font-size: 24px;
             color: #00B6B7;
             margin-right: 15px;
             transition: transform 0.3s ease;
         }
+
         .sidebar .card:hover .card-body i {
             transform: rotate(15deg);
         }
+
         .main-content {
             margin-left: 330px;
             padding: 40px;
             transition: all 0.5s ease;
         }
+
         .main-content h1 {
             color: #00B6B7;
             margin-bottom: 40px;
@@ -77,6 +85,7 @@
             position: relative;
             padding-bottom: 10px;
         }
+
         .main-content h1::after {
             content: '';
             position: absolute;
@@ -87,9 +96,11 @@
             background-color: #00B6B7;
             transition: width 0.3s ease;
         }
+
         .main-content h1:hover::after {
             width: 100px;
         }
+
         .draggable-field {
             cursor: move;
             padding: 20px;
@@ -102,6 +113,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .draggable-field::before {
             content: '';
             position: absolute;
@@ -113,13 +125,16 @@
             transform: scaleX(0);
             transition: transform 0.3s ease;
         }
+
         .draggable-field:hover::before {
             transform: scaleX(1);
         }
+
         .draggable-field:hover {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             transform: translateY(-3px);
         }
+
         .form-control {
             border-radius: 10px;
             border: 2px solid #e0e0e0;
@@ -127,10 +142,12 @@
             font-size: 16px;
             transition: all 0.3s ease;
         }
+
         .form-control:focus {
             border-color: #00B6B7;
             box-shadow: 0 0 0 3px rgba(0, 182, 183, 0.1);
         }
+
         .btn-custom, .btn-success {
             background-color: #00B6B7;
             color: white;
@@ -142,11 +159,13 @@
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(0, 182, 183, 0.3);
         }
+
         .btn-custom:hover, .btn-success:hover {
             background-color: #0056b3;
             transform: translateY(-2px);
             box-shadow: 0 7px 20px rgba(0, 86, 179, 0.4);
         }
+
         .delete-field {
             position: absolute;
             top: 10px;
@@ -165,18 +184,68 @@
             justify-content: center;
             opacity: 0;
         }
+
         .draggable-field:hover .delete-field {
             opacity: 1;
         }
+
         .delete-field:hover {
             background-color: #ff1a1a;
             transform: rotate(90deg);
         }
+
         .ui-state-highlight {
             height: 80px;
             background-color: #f0f8ff;
             border: 2px dashed #00B6B7;
             border-radius: 15px;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            border: none;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7d8a8b;
+        }
+
+        .btn-submit {
+            background-color: #00B6B7;
+            border: none;
+            color: white;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 182, 183, 0.3);
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0, 86, 179, 0.4);
+        }
+
+        .btn-cancel {
+            background-color: #dc3545;
+            border: none;
+            color: white;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-cancel:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(186, 28, 28, 0.4);
         }
     </style>
 {% endblock %}
@@ -185,69 +254,68 @@
     {% for message in app.session.flashBag.get('error') %}
         <div class="alert alert-danger">{{ message }}</div>
     {% endfor %}
-<div class="sidebar">
-    <h4>Ajouter des Champs</h4>
-    <div class="card" id="add-firstname">
-        <div class="card-body">
-            <i class="fas fa-user"></i> Prénom
+
+    <div class="sidebar">
+        <h4>Ajouter des Champs</h4>
+        <div class="card" id="add-firstname">
+            <div class="card-body">
+                <i class="fas fa-user"></i> Prénom
+            </div>
+        </div>
+        <div class="card" id="add-lastname">
+            <div class="card-body">
+                <i class="fas fa-user"></i> Nom
+            </div>
+        </div>
+        <div class="card" id="add-custom-field">
+            <div class="card-body">
+                <i class="fas fa-plus"></i> Champ Personnalisé
+            </div>
         </div>
     </div>
-    <div class="card" id="add-lastname">
-        <div class="card-body">
-            <i class="fas fa-user"></i> Nom
-        </div>
-    </div>
-    <div class="card" id="add-custom-field">
-        <div class="card-body">
-            <i class="fas fa-plus"></i> Champ Personnalisé
-        </div>
-    </div>
-</div>
 
-<div class="main-content">
-    <h1>Créer un Formulaire</h1>
-    <div class="card p-4">
-        {{ form_start(form) }}
+    <div class="main-content">
+        <h1>Créer un Formulaire</h1>
+        <div class="card p-4">
+            {{ form_start(form) }}
 
-
-
-        <div class="draggable-field" id="field-phone">
-            {{ form_widget(form.phone, {'attr': {'placeholder': 'Téléphone', 'class': 'form-control' , 'disabled':'true'}}) }}
-        </div>
-
-        <div id="optional-fields" class="field-container">
-            <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
-                {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
-                <button type="button" class="delete-field" data-field="lastname"><i class="fas fa-trash"></i></button>
+            <div class="draggable-field" id="field-phone">
+                {{ form_widget(form.phone, {'attr': {'placeholder': 'Téléphone', 'class': 'form-control', 'disabled':'true'}}) }}
             </div>
-            <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
-                {{ form_widget(form.firstname, {'attr': {'placeholder': 'Prénom', 'class': 'form-control'}}) }}
 
-                <button type="button" class="delete-field" data-field="firstname"><i class="fas fa-trash"></i></button>
-            </div>
-            <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
-                {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
-                {{ form_errors(form.lastname) }}
-                <button type="button" class="delete-field" data-field="lastname"><i class="fas fa-trash"></i></button>
-            </div>
-            {% for i in 1..4 %}
-                <div class="draggable-field optional-field" id="field-custom{{ i }}" style="display: none;">
-                    {{ form_widget(attribute(form, 'custom' ~ i), {'attr': {'placeholder': 'Saisissez le nom de votre champ', 'class': 'form-control'}}) }}
-                    <button type="button" class="delete-field" data-field="custom{{ i }}"><i class="fas fa-trash"></i></button>
+            <div id="optional-fields" class="field-container">
+                <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
+                    {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
+                    <button type="button" class="delete-field" data-field="lastname"><i class="fas fa-trash"></i></button>
                 </div>
-            {% endfor %}
-        </div>
+                <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
+                    {{ form_widget(form.firstname, {'attr': {'placeholder': 'Prénom', 'class': 'form-control'}}) }}
+                    <button type="button" class="delete-field" data-field="firstname"><i class="fas fa-trash"></i></button>
+                </div>
+                <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
+                    {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
+                    {{ form_errors(form.lastname) }}
+                    <button type="button" class="delete-field" data-field="lastname"><i class="fas fa-trash"></i></button>
+                </div>
+                {% for i in 1..4 %}
+                    <div class="draggable-field optional-field" id="field-custom{{ i }}" style="display: none;">
+                        {{ form_widget(attribute(form, 'custom' ~ i), {'attr': {'placeholder': 'Saisissez le nom de votre champ', 'class': 'form-control'}}) }}
+                        <button type="button" class="delete-field" data-field="custom{{ i }}"><i class="fas fa-trash"></i></button>
+                    </div>
+                {% endfor %}
+            </div>
 
-        <div class="form-group">
-            {{ form_row(form.nom_formulaire, {'attr': {'class': 'form-control'}}) }}
-        </div>
+            <div class="form-group">
+                {{ form_row(form.nom_formulaire, {'attr': {'class': 'form-control'}}) }}
+            </div>
 
-        <div class="form-group text-center mt-4">
-            <button type="submit" class="btn btn-success">Valider</button>
+            <div class="form-group text-center mt-4">
+                <a href="{{ path('mes_formulaires') }}" class="btn btn-cancel mr-2">Annuler</a>
+                <button type="submit" class="btn btn-submit">Valider</button>
+            </div>
+            {{ form_end(form) }}
         </div>
-        {{ form_end(form) }}
     </div>
-</div>
 {% endblock %}
 
 {% block javascripts %}
@@ -311,79 +379,75 @@
                         customFieldIndex--;
                         $('#add-custom-field').prop("disabled", false);
                     }
-                    // Reset the position and opacity for future display
                     gsap.set(field, {y: 0, opacity: 1});
                 }
             });
         });
 
-        // Initial animation for the sidebar
         gsap.from('.sidebar', {duration: 1, x: -300, ease: "power3.out"});
         gsap.from('.main-content', {duration: 1, x: 100, opacity: 0, ease: "power3.out", delay: 0.3});
         gsap.from('.card', {duration: 0.5, y: 50, opacity: 0, ease: "power3.out", stagger: 0.1, delay: 0.5});
     });
     </script>
 
-<script>
-$(document).ready(function() {
-    const fields = ['phone', 'lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
-    const existingFields = {'nom': 'lastname', 'prénom': 'firstname', 'firstname': 'firstname', 'lastname': 'lastname', 'last name': 'lastname', 'first name': 'firstname'};
-    const phoneVariations = ['phone', 'tel', 'tél', 'telephon' , 'télephon', 'tèlephon', 'tèlèphon', 'teléphon' , 'telèphon'];
+    <script>
+    $(document).ready(function() {
+        const fields = ['phone', 'lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
+        const existingFields = {'nom': 'lastname', 'prénom': 'firstname', 'firstname': 'firstname', 'lastname': 'lastname', 'last name': 'lastname', 'first name': 'firstname'};
+        const phoneVariations = ['phone', 'tel', 'tél', 'telephon' , 'télephon', 'tèlephon', 'tèlèphon', 'teléphon' , 'telèphon'];
 
-    function normalizeString(str) {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    }
+        function normalizeString(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
 
-    function validateFields() {
-        let values = {};
-        let isValid = true;
+        function validateFields() {
+            let values = {};
+            let isValid = true;
 
-        fields.forEach(field => {
-            const input = $(`#field-${field} input`);
-            const value = normalizeString(input.val());
-            input.removeClass('is-invalid');
-            input.next('.invalid-feedback').remove();
+            fields.forEach(field => {
+                const input = $(`#field-${field} input`);
+                const value = normalizeString(input.val());
+                input.removeClass('is-invalid');
+                input.next('.invalid-feedback').remove();
 
-            if (value) {
-                // Check for phone variations
-                if (phoneVariations.includes(value)) {
-                    isValid = false;
-                    addError(input, 'Utilisez "Téléphone" qui existe déja à la place de ses variantes.');
+                if (value) {
+                    if (phoneVariations.includes(value)) {
+                        isValid = false;
+                        addError(input, 'Utilisez "Téléphone" qui existe déjà à la place de ses variantes.');
+                    }
+
+                    if (values[value]) {
+                        isValid = false;
+                        addError(input, 'Valeur dupliquée trouvée.');
+                        addError($(`#field-${values[value]} input`), 'Attention Duplication de valeur.');
+                    } else if (existingFields[value] && existingFields[value] !== field) {
+                        isValid = false;
+                        addError(input, `La valeur "${input.val()}" a déjà un bouton existant.`);
+                    } else {
+                        values[value] = field;
+                    }
                 }
+            });
 
-                if (values[value]) {
-                    isValid = false;
-                    addError(input, 'Duplicate value found.');
-                    addError($(`#field-${values[value]} input`), 'Attenttion Duplication de valeur.');
-                } else if (existingFields[value] && existingFields[value] !== field) {
-                    isValid = false;
-                    addError(input, `La valeur "${input.val()}" à déja un bouton existant.`);
-                } else {
-                    values[value] = field;
-                }
+            return isValid;
+        }
+
+        function addError(input, message) {
+            input.addClass('is-invalid');
+            input.after(`<div class="invalid-feedback">${message}</div>`);
+        }
+
+        $('form').on('submit', function(event) {
+            if (!validateFields()) {
+                event.preventDefault();
             }
         });
 
-        return isValid;
-    }
-
-    function addError(input, message) {
-        input.addClass('is-invalid');
-        input.after(`<div class="invalid-feedback">${message}</div>`);
-    }
-
-    $('form').on('submit', function(event) {
-        if (!validateFields()) {
-            event.preventDefault();
-        }
-    });
-
-    fields.forEach(field => {
-        $(`#field-${field} input`).on('input', function() {
-            validateFields();
+        fields.forEach(field => {
+            $(`#field-${field} input`).on('input', function() {
+                validateFields();
+            });
         });
     });
-});
-</script>
-
+    </script>
 {% endblock %}
