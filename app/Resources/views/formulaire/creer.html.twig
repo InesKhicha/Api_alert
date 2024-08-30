@@ -282,13 +282,8 @@
             <div class="draggable-field" id="field-phone">
                 {{ form_widget(form.phone, {'attr': {'placeholder': 'Téléphone', 'class': 'form-control', 'disabled':'true'}}) }}
             </div>
-
             <div id="optional-fields" class="field-container">
-                <div class="draggable-field optional-field" id="field-lastname" style="display: none;">
-                    {{ form_widget(form.lastname, {'attr': {'placeholder': 'Nom', 'class': 'form-control'}}) }}
-                    <button type="button" class="delete-field" data-field="lastname"><i class="fas fa-trash"></i></button>
-                </div>
-                <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
+                              <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
                     {{ form_widget(form.firstname, {'attr': {'placeholder': 'Prénom', 'class': 'form-control'}}) }}
                     <button type="button" class="delete-field" data-field="firstname"><i class="fas fa-trash"></i></button>
                 </div>
@@ -393,8 +388,8 @@
     <script>
     $(document).ready(function() {
         const fields = ['phone', 'lastname', 'firstname', 'custom1', 'custom2', 'custom3', 'custom4'];
-        const existingFields = {'nom': 'lastname', 'prénom': 'firstname', 'firstname': 'firstname', 'lastname': 'lastname', 'last name': 'lastname', 'first name': 'firstname'};
-        const phoneVariations = ['phone', 'tel', 'tél', 'telephon' , 'télephon', 'tèlephon', 'tèlèphon', 'teléphon' , 'telèphon'];
+        const existingFields = {'nom': 'lastname', 'prénom': 'firstname', 'firstname': 'firstname', 'lastname': 'lastname', 'last name': 'lastname', 'first name': 'firstname', 'prenom': 'firstname'};
+        const phoneVariations = ['phone', 'tel', 'tél', 'telephon' , 'télephon', 'tèlephon', 'tèlèphon', 'teléphon' , 'telèphon','numéro','numero'];
 
         function normalizeString(str) {
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
