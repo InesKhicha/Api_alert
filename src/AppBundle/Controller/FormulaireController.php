@@ -1,8 +1,6 @@
 <?php
 // src/AppBundle/Controller/FormulaireController.php
 namespace AppBundle\Controller;
-
-use AppBundle\Entity\Client;
 use AppBundle\Entity\Groupe;
 use AppBundle\Entity\CodeValide;
 use AppBundle\Entity\Formulaire;
@@ -11,7 +9,6 @@ use AppBundle\Form\FormulaireType;
 use AppBundle\Form\FileContentType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
-use AppBundle\Repository\CodeValideRepository; 
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -132,7 +129,6 @@ public function afficherFormulaireAction(Request $request, $code)
     if (!$formulaire) {
         throw $this->createNotFoundException('Formulaire non trouvé');
     }
-    
     $groupe = $formulaire->getGroupe();
     $fileContent = new FileContent();
     $form = $this->createForm(FileContentType::class, $fileContent, ['formulaire' => $formulaire]);
@@ -158,16 +154,13 @@ public function afficherFormulaireAction(Request $request, $code)
             'grp' => $groupe
         ]);
 
-
-
         if ($existingContent && $action === 'inscription' ) {
             // Ajoutez une erreur au formulaire
             $form->get('phone')->addError(new FormError("Ce numéro de téléphone existe déjà dans ce groupe."));
             
         }elseif(!$existingContent && $action === 'desinscription' ) {
             // Ajoutez une erreur au formulaire
-            $form->get('phone')->addError(new FormError("Vous etes pas inscrit avec ce numéro dans ce groupe."));
-            
+            $form->get('phone')->addError(new FormError("Vous etes pas inscrit avec ce numéro dans ce groupe."));         
         } 
         else {
             $expiredCodes = $em->getRepository('AppBundle:CodeValide')->findBy(['expired' => true]);
@@ -179,10 +172,8 @@ public function afficherFormulaireAction(Request $request, $code)
             $validationCode = mt_rand(100000, 999999);
             $phoneNumber = $fileContent->getPhone();
             $message = "Votre code de validation est : $validationCode";
-
             $smsService = $this->get('app.sms_service');
             $response = $smsService->sendSms($phoneNumber, $message);
-
             if (isset($response['success']) && $response['success']) {
                 $codeValide = new CodeValide();
                 $codeValide->setCode($validationCode);
@@ -263,9 +254,9 @@ public function afficherFormulaireAction(Request $request, $code)
                     $codeValide->setExpired(true);
                     $em->flush();
                     if ($minutes > 5 || ($minutes == 5 && $seconds > 0 ) && ($codeValide->isExpired())) {
-                        $this->addFlash('error', 'Le code de validation a expiré.');
+                        $this->addFlash('danger', 'Le code de validation a expiré.');
                     } else {
-                        $this->addFlash('error', 'Code de validation incorrect.');
+                        $this->addFlash('danger', 'Code de validation incorrect.');
                     }
                 
                     // Affiche le bouton "Renvoyer le code"
@@ -274,40 +265,62 @@ public function afficherFormulaireAction(Request $request, $code)
                         'showResendButton' => true, // On passe cette variable au template
                     ]);
                     
-                    $this->addFlash('error', 'Le code de validation a expiré.');
+                    $this->addFlash('danger', 'Le code de validation a expiré.');
                 } elseif ($submittedCode == $codeValide->getCode()) {
                     $codeValide->setExpired(true);
                     $em->flush();
     
-                    if ($formData && $action==='inscription' ) {
-                        $em->persist($fileContent);
-                        $em->flush();
-    
-                        return $this->redirectToRoute('homepage');
-                    }
-                    elseif($formData && $action === 'desinscription' ) {
-                        $fileContentRM = new FileContent();
+                    if ($action === 'inscription') {
+                        // Vérifier si l'utilisateur est déjà inscrit
+                        $existingUser = $em->getRepository('AppBundle:FileContent')->findOneBy([
+                            'phone' => $fileContent->getPhone(),
+                            'grp' => $fileContent->getGrp()
+                        ]);
+                
+                        if ($existingUser) {
+                            // L'utilisateur est déjà inscrit
+                            $this->addFlash('danger', 'ATTENTION :Vous êtes déjà inscrit.');
+                        } else {
+                            // Ajouter le nouvel utilisateur
+                            $em->persist($fileContent);
+                            $em->flush();
+                
+                            return $this->redirectToRoute('homepage');
+                        }
+                    } elseif ($action === 'desinscription') {
+                        // Vérifier si l'utilisateur est inscrit
                         $fileContentRM = $em->getRepository('AppBundle:FileContent')->findOneBy([
                             'phone' => $fileContent->getPhone(),
                             'grp' => $fileContent->getGrp()
                         ]);
-
+                
+                        if ($fileContentRM) {
+                            // Supprimer l'utilisateur
                             $em->remove($fileContentRM);
                             $em->flush();
+                
                             return $this->redirectToRoute('desinscription_success');
-                        
-                    }else{$this->addFlash('error', 'Pas de données recupéré.');}
+                        } else {
+                            // L'utilisateur n'est pas inscrit
+                            $this->addFlash('danger', 'ATTENTION : Vous n\'êtes pas inscrit !! ');
+                        } 
+                    }else{$this->addFlash('danger', 'Pas de données recupéré.');}
                 } else {
-                    $this->addFlash('error', 'Code de validation incorrect ou expiré.');
+                    $this->addFlash('danger', 'Code de validation incorrect ou expiré.');
                 }
             }
+        
+        
+        
+        
         }else {
-            $this->addFlash('error', 'Code de validation incorrect ou expiré.');
+            $this->addFlash('danger', 'Code non reçu veilliez réffectuer l\'opperation SVP.');
         }
     
         return $this->render('formulaire/validate_code.html.twig', [
             'codeId' => $codeId,
         ]);
+   
     }
 /**
  * @Route("/desinscription-success", name="desinscription_success")
@@ -342,10 +355,10 @@ public function resendCodeAction($codeId)
 
             $this->addFlash('success', 'Un nouveau code de validation a été envoyé.');
         } else {
-            $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
+            $this->addFlash('danger', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
         }
     } else {
-        $this->addFlash('error', 'Impossible de renvoyer le code.');
+        $this->addFlash('danger', 'Impossible de renvoyer le code.');
     }
 
     return $this->redirectToRoute('validate_code', ['codeId' => $codeId]);
