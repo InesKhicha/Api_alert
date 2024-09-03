@@ -4,6 +4,21 @@
     {{ parent() }}
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        
+ .max-fields-notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: red;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 30px;
+        font-size: 18px;
+        font-weight: 600;
+        box-shadow: 0 5px 15px rgba(0, 182, 183, 0.3);
+        z-index: 1000;
+    }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -226,6 +241,7 @@
 
         .btn-submit:hover {
             background-color: #0056b3;
+            color: white;
             transform: translateY(-2px);
             box-shadow: 0 7px 20px rgba(0, 86, 179, 0.4);
         }
@@ -247,6 +263,11 @@
             transform: translateY(-2px);
             box-shadow: 0 7px 20px rgba(186, 28, 28, 0.4);
         }
+    #add-custom-field.max-reached {
+    cursor: not-allowed;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
     </style>
 {% endblock %}
 
@@ -346,12 +367,32 @@
         let customFieldIndex = 1;
         const totalCustomFields = 4;
 
+        function showMaxFieldsReachedAnimation() {
+            const notification = $('<div class="max-fields-notification">Nombre maximum de champs atteint!</div>');
+            $('body').append(notification);
+
+            gsap.fromTo(notification, 
+                {y: 50, opacity: 0},
+                {duration: 0.5, y: 0, opacity: 1, ease: "bounce.out"}
+            );
+
+            gsap.to(notification, {
+                duration: 0.5,
+                opacity: 0,
+                delay: 2,
+                onComplete: function() {
+                    notification.remove();
+                }
+            });
+        }
+
         $('#add-custom-field').click(function() {
             if (customFieldIndex <= totalCustomFields) {
                 addField('custom' + customFieldIndex, '');
                 customFieldIndex++;
                 if (customFieldIndex > totalCustomFields) {
                     $(this).prop("disabled", true);
+                    showMaxFieldsReachedAnimation();
                 }
             }
         });

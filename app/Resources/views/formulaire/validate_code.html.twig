@@ -151,45 +151,37 @@
         {% endif %}
     </div>
 
-    {% if showResendButton is not defined or not showResendButton %}
-        <script>
-            // Set the initial countdown time
-            var initialTime = 300; // 3 minutes in seconds
+   {% if showResendButton is not defined or not showResendButton %}
+    <script>
+        var initialTime = {{ 300 - minutes * 60 - seconds }};
+        var timeLeft = initialTime > 0 ? initialTime : 0;
 
-            // Check if there's a saved countdown in localStorage
-            var savedTimeLeft = localStorage.getItem('timeLeft');
-            var timeLeft = savedTimeLeft ? parseInt(savedTimeLeft) : initialTime;
-            
-            // Update the countdown display
-            function updateCountdownDisplay() {
-                var minutes = Math.floor(timeLeft / 60);
-                var seconds = timeLeft % 60;
-                seconds = seconds < 10 ? '0' + seconds : seconds;
-                document.getElementById('countdown').textContent = minutes + ':' + seconds;
-            }
+        function updateCountdownDisplay() {
+            var minutes = Math.floor(timeLeft / 60);
+            var seconds = timeLeft % 60;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            document.getElementById('countdown').textContent = minutes + ':' + seconds;
+        }
 
-            // Start the countdown timer
-            var countdownTimer = setInterval(function() {
-                if (timeLeft <= 0) {
-                    clearInterval(countdownTimer);
-                    document.getElementById('countdown').textContent = '00:00';
-                    alert('Le code de validation a expiré.');
-                    localStorage.removeItem('timeLeft'); // Clear the saved time
-                    document.querySelector('.countdown-container').innerHTML = '<a href="{{ path('resend_code', {'codeId': codeId}) }}" class="btn btn-secondary"><i class="fas fa-redo"></i> Renvoyer le code</a>';
-                } else {
-                    timeLeft--;
-                    updateCountdownDisplay();
-                    localStorage.setItem('timeLeft', timeLeft); // Save the time left
-                }
-            }, 1000);
-
-            // Initialize the countdown display
-            updateCountdownDisplay();
-
-            // Clear localStorage when the form is submitted
-            document.querySelector('form').addEventListener('submit', function() {
+        var countdownTimer = setInterval(function() {
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                document.getElementById('countdown').textContent = '00:00';
+                alert('Le code de validation a expiré.');
                 localStorage.removeItem('timeLeft');
-            });
-        </script>
+                document.querySelector('.countdown-container').innerHTML = '<a href="{{ path('resend_code', {'codeId': codeId}) }}" class="btn btn-secondary"><i class="fas fa-redo"></i> Renvoyer le code</a>';
+            } else {
+                timeLeft--;
+                updateCountdownDisplay();
+                localStorage.setItem('timeLeft', timeLeft);
+            }
+        }, 1000);
+
+        updateCountdownDisplay();
+
+        document.querySelector('form').addEventListener('submit', function() {
+            localStorage.removeItem('timeLeft');
+        });
+    </script>
     {% endif %}
 {% endblock %}

@@ -181,6 +181,7 @@ public function afficherFormulaireAction(Request $request, $code)
             }
 
             if ($recentEntryFound) {
+                
                 $this->addFlash('danger', 'Vous avez déjà effectué cette opération. Retournez à votre page précédente et entrez votre code.');
             } else {
                 // Proceed with the existing logic to handle the form submission
@@ -239,116 +240,118 @@ public function afficherFormulaireAction(Request $request, $code)
         'form' => $form->createView(),
     ]);
 }
-    /**
-     * @Route("/validate-code/{codeId}", name="validate_code")
-     */
-    public function validateCodeAction(Request $request, $codeId)
-    {
-        $submittedCode = $request->request->get('validation_code');
-        $em = $this->getDoctrine()->getManager();
-    
-           // Ensure the correct repository method is called
-           $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
-    
-        if ($codeValide) {
-            $fileContent = new FileContent();
-            $formData = unserialize($codeValide->getFormData());
-            
-            if ($formData) {
-                $fileContent->setPhone($formData['phone']);
-                $fileContent->setLastname($formData['lastname']);
-                $fileContent->setFirstname($formData['firstname']);
-                $fileContent->setCustom1($formData['custom1']);
-                $fileContent->setCustom2($formData['custom2']);
-                $fileContent->setCustom3($formData['custom3']);
-                $fileContent->setCustom4($formData['custom4']);
-                $idgrp=$formData['grp'];
-                $action=$formData['action'];
-                $groupe = $em->getRepository('AppBundle:Groupe')->find($idgrp);
-                $fileContent->setGrp($groupe);
-           
-           
-            }
-    
-            if ($request->isMethod('POST')) {
-                $currentDateTime = new \DateTime();
-                $codeCreationTime = $codeValide->getCreatedAt();
-                $interval = $currentDateTime->diff($codeCreationTime);
-                $minutes = $interval->i;
-                $seconds = $interval->s;
-    
-                if ($minutes > 5 || ($minutes == 5 && $seconds > 0 )) {
-                    $codeValide->setExpired(true);
-                    $em->flush();
-                    if ($minutes > 5 || ($minutes == 5 && $seconds > 0 ) && ($codeValide->isExpired())) {
-                        $this->addFlash('danger', 'Le code de validation a expiré.');
-                    } else {
-                        $this->addFlash('danger', 'Code de validation incorrect.');
-                    }
-                
-                    // Affiche le bouton "Renvoyer le code"
-                    return $this->render('formulaire/validate_code.html.twig', [
-                        'codeId' => $codeId,
-                        'showResendButton' => true, // On passe cette variable au template
-                    ]);
-                    
-                    $this->addFlash('danger', 'Le code de validation a expiré.');
-                } elseif ($submittedCode == $codeValide->getCode()) {
-                    $codeValide->setExpired(true);
-                    $em->flush();
-    
-                    if ($action === 'inscription') {
-                        // Vérifier si l'utilisateur est déjà inscrit
-                        $existingUser = $em->getRepository('AppBundle:FileContent')->findOneBy([
-                            'phone' => $fileContent->getPhone(),
-                            'grp' => $fileContent->getGrp()
-                        ]);
-                
-                        if ($existingUser) {
-                            // L'utilisateur est déjà inscrit
-                            $this->addFlash('danger', 'ATTENTION :Vous êtes déjà inscrit.');
-                        } else {
-                            // Ajouter le nouvel utilisateur
-                            $em->persist($fileContent);
-                            $em->flush();
-                
-                            return $this->redirectToRoute('homepage');
-                        }
-                    } elseif ($action === 'desinscription') {
-                        // Vérifier si l'utilisateur est inscrit
-                        $fileContentRM = $em->getRepository('AppBundle:FileContent')->findOneBy([
-                            'phone' => $fileContent->getPhone(),
-                            'grp' => $fileContent->getGrp()
-                        ]);
-                
-                        if ($fileContentRM) {
-                            // Supprimer l'utilisateur
-                            $em->remove($fileContentRM);
-                            $em->flush();
-                
-                            return $this->redirectToRoute('desinscription_success');
-                        } else {
-                            // L'utilisateur n'est pas inscrit
-                            $this->addFlash('danger', 'ATTENTION : Vous n\'êtes pas inscrit !! ');
-                        } 
-                    }else{$this->addFlash('danger', 'Pas de données recupéré.');}
-                } else {
-                    $this->addFlash('danger', 'Code de validation incorrect ou expiré.');
-                }
-            }
-        
-        
-        
-        
-        }else {
-            $this->addFlash('danger', 'Code non reçu veilliez réffectuer l\'opperation SVP.');
+   /**
+ * @Route("/validate-code/{codeId}", name="validate_code")
+ */
+public function validateCodeAction(Request $request, $codeId)
+{
+    $submittedCode = $request->request->get('validation_code');
+    $em = $this->getDoctrine()->getManager();
+
+    // Récupération du code de validation à partir de l'ID
+    $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
+
+    if ($codeValide) {
+        // Vérification du temps écoulé depuis la création du code
+        $currentDateTime = new \DateTime();
+        $codeCreationTime = $codeValide->getCreatedAt();
+        $interval = $currentDateTime->diff($codeCreationTime);
+        $minutes = $interval->i;
+        $seconds = $interval->s;
+
+        // Vérification si le code a expiré (plus de 5 minutes)
+        if ($minutes > 5 || ($minutes == 5 && $seconds > 0)) {
+            $codeValide->setExpired(true);
+            $em->flush();
+            $this->addFlash('danger', 'Le code de validation a expiré.');
+            return $this->render('formulaire/validate_code.html.twig', [
+                'codeId' => $codeId,
+                'showResendButton' => true, // Afficher le bouton pour renvoyer le code
+            ]);
         }
-    
+
+        // Si le formulaire a été soumis
+        if ($request->isMethod('POST')) {
+            if ($submittedCode == $codeValide->getCode()) {
+                // Marquer le code comme expiré une fois utilisé
+                $codeValide->setExpired(true);
+                $em->flush();
+
+                // Récupération des données liées au code
+                $fileContent = new FileContent();
+                $formData = unserialize($codeValide->getFormData());
+                
+                if ($formData) {
+                    $fileContent->setPhone($formData['phone']);
+                    $fileContent->setLastname($formData['lastname']);
+                    $fileContent->setFirstname($formData['firstname']);
+                    $fileContent->setCustom1($formData['custom1']);
+                    $fileContent->setCustom2($formData['custom2']);
+                    $fileContent->setCustom3($formData['custom3']);
+                    $fileContent->setCustom4($formData['custom4']);
+                    $idgrp = $formData['grp'];
+                    $action = $formData['action'];
+                    $groupe = $em->getRepository('AppBundle:Groupe')->find($idgrp);
+                    $fileContent->setGrp($groupe);
+                }
+
+                // Gestion des différentes actions (inscription ou désinscription)
+                if ($action === 'inscription') {
+                    // Vérifier si l'utilisateur est déjà inscrit
+                    $existingUser = $em->getRepository('AppBundle:FileContent')->findOneBy([
+                        'phone' => $fileContent->getPhone(),
+                        'grp' => $fileContent->getGrp()
+                    ]);
+
+                    if ($existingUser) {
+                        // L'utilisateur est déjà inscrit
+                        $this->addFlash('danger', 'ATTENTION : Vous êtes déjà inscrit.');
+                    } else {
+                        // Ajouter le nouvel utilisateur
+                        $em->persist($fileContent);
+                        $em->flush();
+
+                        return $this->redirectToRoute('homepage');
+                    }
+                } elseif ($action === 'desinscription') {
+                    // Vérifier si l'utilisateur est inscrit
+                    $fileContentRM = $em->getRepository('AppBundle:FileContent')->findOneBy([
+                        'phone' => $fileContent->getPhone(),
+                        'grp' => $fileContent->getGrp()
+                    ]);
+
+                    if ($fileContentRM) {
+                        // Supprimer l'utilisateur
+                        $em->remove($fileContentRM);
+                        $em->flush();
+
+                        return $this->redirectToRoute('desinscription_success');
+                    } else {
+                        // L'utilisateur n'est pas inscrit
+                        $this->addFlash('danger', 'ATTENTION : Vous n\'êtes pas inscrit !!');
+                    }
+                } else {
+                    $this->addFlash('danger', 'Aucune action valide trouvée.');
+                }
+            } else {
+                $this->addFlash('danger', 'Code de validation incorrect ou expiré.');
+            }
+        }
+
+        // Afficher le formulaire pour entrer le code de validation
+        return $this->render('formulaire/validate_code.html.twig', [
+            'codeId' => $codeId,
+            'minutes' => $minutes,
+            'seconds' => $seconds,
+        ]);
+    } else {
+        $this->addFlash('danger', 'Code non reçu, veuillez réessayer.');
         return $this->render('formulaire/validate_code.html.twig', [
             'codeId' => $codeId,
         ]);
-   
     }
+}
+
 /**
  * @Route("/desinscription-success", name="desinscription_success")
  */
