@@ -117,7 +117,6 @@ private function normalizeString($str)
 {
     return strtolower(preg_replace('/[\x{0300}-\x{036f}]/u', '', \Normalizer::normalize($str, \Normalizer::FORM_D)));
 }
-
 /**
  * @Route("/formulaire/{code}", name="afficher_formulaire")
  */
@@ -129,10 +128,10 @@ public function afficherFormulaireAction(Request $request, $code)
     if (!$formulaire) {
         throw $this->createNotFoundException('Formulaire non trouvé');
     }
+    
     $groupe = $formulaire->getGroupe();
     $fileContent = new FileContent();
     $form = $this->createForm(FileContentType::class, $fileContent, ['formulaire' => $formulaire]);
-    
     $form->handleRequest($request);
     
     if ($form->isSubmitted() && $form->isValid()) {
@@ -140,68 +139,97 @@ public function afficherFormulaireAction(Request $request, $code)
         $phoneNumber = $form->get('phone')->getData();
         $action = $request->request->get('action');
 
-         // Trim only the leading zero if it exists
-    if (strpos($phoneNumber, '0') === 0) {
-        $formattedPhoneNumber = substr($phoneNumber, 1); // Remove the first character (leading zero)
-    } else {
-        $formattedPhoneNumber = $phoneNumber; // No leading zero to remove
-    }
+        if (strpos($phoneNumber, '0') === 0) {
+            $formattedPhoneNumber = substr($phoneNumber, 1);
+        } else {
+            $formattedPhoneNumber = $phoneNumber;
+        }
+        
         $fullPhoneNumber = $countryCode . $formattedPhoneNumber;
-        // Vérifiez si le numéro de téléphone existe déjà dans le groupe
-        $fileContent->setphone($fullPhoneNumber);
-        $existingContent = $em->getRepository('AppBundle:FileContent')->findOneBy([
+        $fileContent->setPhone($fullPhoneNumber);
+
+        // Check if the user is already registered or not
+        $existingUser = $em->getRepository('AppBundle:FileContent')->findOneBy([
             'phone' => $fileContent->getPhone(),
             'grp' => $groupe
         ]);
 
-        if ($existingContent && $action === 'inscription' ) {
-            // Ajoutez une erreur au formulaire
-            $form->get('phone')->addError(new FormError("Ce numéro de téléphone existe déjà dans ce groupe."));
-            
-        }elseif(!$existingContent && $action === 'desinscription' ) {
-            // Ajoutez une erreur au formulaire
-            $form->get('phone')->addError(new FormError("Vous etes pas inscrit avec ce numéro dans ce groupe."));         
-        } 
-        else {
-            $expiredCodes = $em->getRepository('AppBundle:CodeValide')->findBy(['expired' => true]);
-            foreach ($expiredCodes as $code) {
-                $em->remove($code);
+        if ($action === 'inscription' && $existingUser) {
+            // User is already registered
+            $this->addFlash('danger', 'ATTENTION : Vous êtes déjà inscrit.');
+        } elseif ($action === 'desinscription' && !$existingUser) {
+            // User is not registered
+            $this->addFlash('danger', 'ATTENTION : Vous n\'êtes pas inscrit !!');
+        } else {
+            // Check if the phone number exists in the last 5 minutes
+            $fiveMinutesAgo = new \DateTime('-5 minutes');
+            $recentEntries = $em->getRepository('AppBundle:CodeValide')->findBy([
+                'phone' => $fileContent->getPhone(),
+                'expired' => false
+            ], ['createdAt' => 'DESC']);
+
+            $recentEntryFound = false;
+
+            foreach ($recentEntries as $entry) {
+                if ($entry->getCreatedAt() > $fiveMinutesAgo) {
+                    $formData = unserialize($entry->getFormData());
+                    if (isset($formData['grp']) && $formData['grp'] == $groupe->getId()) {
+                        $recentEntryFound = true;
+                        break;
+                    }
+                }
             }
-            $em->flush();
-            // Générer le code de validation
-            $validationCode = mt_rand(100000, 999999);
-            $phoneNumber = $fileContent->getPhone();
-            $message = "Votre code de validation est : $validationCode";
-            $smsService = $this->get('app.sms_service');
-            $response = $smsService->sendSms($phoneNumber, $message);
-            if (isset($response['success']) && $response['success']) {
-                $codeValide = new CodeValide();
-                $codeValide->setCode($validationCode);
-                $codeValide->setExpired(false);
-                $codeValide->setCreatedAt(new \DateTime());
-                $codeValide->setPhone($fileContent->getPhone());
 
-                // Sérialiser les données du formulaire pour les stocker dans CodeValide
-                $dataToEncode = serialize([
-                    'phone' => $fileContent->getPhone(),
-                    'lastname' => $fileContent->getLastname(),
-                    'firstname' => $fileContent->getFirstname(),
-                    'custom1' => $fileContent->getCustom1(),
-                    'custom2' => $fileContent->getCustom2(),
-                    'custom3' => $fileContent->getCustom3(),
-                    'custom4' => $fileContent->getCustom4(),
-                    'grp' => $groupe->getId(),
-                    'action' => $action // Ajouter l'action au tableau 
-                ]);
+            if ($recentEntryFound) {
+                $this->addFlash('danger', 'Vous avez déjà effectué cette opération. Retournez à votre page précédente et entrez votre code.');
+            } else {
+                // Proceed with the existing logic to handle the form submission
+                $codesToRemove = $em->getRepository('AppBundle:CodeValide')->createQueryBuilder('c')
+                    ->where('c.expired = true OR c.createdAt < :fiveMinutesAgo')
+                    ->setParameter('fiveMinutesAgo', $fiveMinutesAgo)
+                    ->getQuery()
+                    ->getResult();
 
-                $codeValide->setFormData($dataToEncode);
-                $em->persist($codeValide);
+                foreach ($codesToRemove as $code) {
+                    $em->remove($code);
+                }
                 $em->flush();
 
-                return $this->redirectToRoute('validate_code', ['codeId' => $codeValide->getId()]);
-            } else {
-                $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
-                $this->get('logger')->error('SMS sending failed', ['response' => "response"]);
+                // Générer le code de validation
+                $validationCode = mt_rand(100000, 999999);
+                $phoneNumber = $fileContent->getPhone();
+                $message = "Votre code de validation est : $validationCode";
+                $smsService = $this->get('app.sms_service');
+                $response = $smsService->sendSms($phoneNumber, $message);
+
+                if (isset($response['success']) && $response['success']) {
+                    $codeValide = new CodeValide();
+                    $codeValide->setCode($validationCode);
+                    $codeValide->setExpired(false);
+                    $codeValide->setCreatedAt(new \DateTime());
+                    $codeValide->setPhone($fileContent->getPhone());
+
+                    $dataToEncode = serialize([
+                        'phone' => $fileContent->getPhone(),
+                        'lastname' => $fileContent->getLastname(),
+                        'firstname' => $fileContent->getFirstname(),
+                        'custom1' => $fileContent->getCustom1(),
+                        'custom2' => $fileContent->getCustom2(),
+                        'custom3' => $fileContent->getCustom3(),
+                        'custom4' => $fileContent->getCustom4(),
+                        'grp' => $groupe->getId(),
+                        'action' => $action
+                    ]);
+
+                    $codeValide->setFormData($dataToEncode);
+                    $em->persist($codeValide);
+                    $em->flush();
+
+                    return $this->redirectToRoute('validate_code', ['codeId' => $codeValide->getId()]);
+                } else {
+                    $this->addFlash('error', 'Erreur lors de l\'envoi du SMS. Veuillez réessayer.');
+                    $this->get('logger')->error('SMS sending failed', ['response' => $response]);
+                }
             }
         }
     }
@@ -211,7 +239,6 @@ public function afficherFormulaireAction(Request $request, $code)
         'form' => $form->createView(),
     ]);
 }
-
     /**
      * @Route("/validate-code/{codeId}", name="validate_code")
      */
