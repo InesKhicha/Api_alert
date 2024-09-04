@@ -117,7 +117,6 @@
         }
 
         .draggable-field {
-            cursor: move;
             padding: 20px;
             border: 2px solid #e0e0e0;
             margin-bottom: 20px;
@@ -263,11 +262,19 @@
             transform: translateY(-2px);
             box-shadow: 0 7px 20px rgba(186, 28, 28, 0.4);
         }
-    #add-custom-field.max-reached {
+#add-custom-field.max-reached {
     cursor: not-allowed;
     opacity: 0.7;
-    transition: all 0.3s ease;
+    transition:none;
+    background-color: #d3d3d3; /* Light gray background */
+    color: #a9a9a9; /* Gray text color */
 }
+
+#add-custom-field.max-reached i {
+    color: #a9a9a9; /* Gray icon color */
+     transform: rotate(0deg);
+}
+
     </style>
 {% endblock %}
 
@@ -276,24 +283,24 @@
         <div class="alert alert-danger">{{ message }}</div>
     {% endfor %}
 
-    <div class="sidebar">
-        <h4>Ajouter des Champs</h4>
-        <div class="card" id="add-firstname">
-            <div class="card-body">
-                <i class="fas fa-user"></i> Prénom
-            </div>
-        </div>
-        <div class="card" id="add-lastname">
-            <div class="card-body">
-                <i class="fas fa-user"></i> Nom
-            </div>
-        </div>
-        <div class="card" id="add-custom-field">
-            <div class="card-body">
-                <i class="fas fa-plus"></i> Champ Personnalisé
-            </div>
+   <div class="sidebar">
+    <h4>Ajouter des Champs</h4>
+    <div class="card" id="add-firstname">
+        <div class="card-body">
+            <i class="fas fa-user"></i> Prénom
         </div>
     </div>
+    <div class="card" id="add-lastname">
+        <div class="card-body">
+            <i class="fas fa-tag"></i> Nom
+        </div>
+    </div>
+    <div class="card" id="add-custom-field">
+        <div class="card-body">
+            <i class="fas fa-plus-circle"></i> Champ Personnalisé
+        </div>
+    </div>
+</div>
 
     <div class="main-content">
         <h1>Créer un Formulaire</h1>
@@ -304,7 +311,7 @@
                 {{ form_widget(form.phone, {'attr': {'placeholder': 'Téléphone', 'class': 'form-control', 'disabled':'true'}}) }}
             </div>
             <div id="optional-fields" class="field-container">
-                              <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
+                     <div class="draggable-field optional-field" id="field-firstname" style="display: none;">
                     {{ form_widget(form.firstname, {'attr': {'placeholder': 'Prénom', 'class': 'form-control'}}) }}
                     <button type="button" class="delete-field" data-field="firstname"><i class="fas fa-trash"></i></button>
                 </div>
@@ -338,92 +345,100 @@
     {{ parent() }}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
     <script>
-    $(document).ready(function() {
-        $('#optional-fields').sortable({
-            handle: '.draggable-field',
-            placeholder: 'ui-state-highlight',
-            start: function(event, ui) {
-                ui.placeholder.height(ui.item.height());
-            }
-        });
-
-        function addField(fieldId, fieldName) {
-            const field = $('#field-' + fieldId);
-            field.css('display', 'block');
-            field.find('input').val(fieldName);
-            $('#add-' + fieldId).prop("disabled", true);
-
-            gsap.from(field, {duration: 0.5, y: 50, opacity: 0, ease: "power3.out"});
+  $(document).ready(function() {
+    $('#optional-fields').sortable({
+        handle: '.draggable-field',
+        placeholder: 'ui-state-highlight',
+        start: function(event, ui) {
+            ui.placeholder.height(ui.item.height());
         }
-
-        $('#add-firstname').click(function() {
-            addField('firstname', 'Prénom');
-        });
-
-        $('#add-lastname').click(function() {
-            addField('lastname', 'Nom');
-        });
-
-        let customFieldIndex = 1;
-        const totalCustomFields = 4;
-
-        function showMaxFieldsReachedAnimation() {
-            const notification = $('<div class="max-fields-notification">Nombre maximum de champs atteint!</div>');
-            $('body').append(notification);
-
-            gsap.fromTo(notification, 
-                {y: 50, opacity: 0},
-                {duration: 0.5, y: 0, opacity: 1, ease: "bounce.out"}
-            );
-
-            gsap.to(notification, {
-                duration: 0.5,
-                opacity: 0,
-                delay: 2,
-                onComplete: function() {
-                    notification.remove();
-                }
-            });
-        }
-
-        $('#add-custom-field').click(function() {
-            if (customFieldIndex <= totalCustomFields) {
-                addField('custom' + customFieldIndex, '');
-                customFieldIndex++;
-                if (customFieldIndex > totalCustomFields) {
-                    $(this).prop("disabled", true);
-                    showMaxFieldsReachedAnimation();
-                }
-            }
-        });
-
-        $(document).on('click', '.delete-field', function() {
-            const fieldId = $(this).data('field');
-            const field = $('#field-' + fieldId);
-
-            gsap.to(field, {
-                duration: 0.3,
-                y: -20,
-                opacity: 0,
-                ease: "power3.in",
-                onComplete: function() {
-                    field.css('display', 'none');
-                    field.find('input').val('');
-                    if (fieldId === 'firstname' || fieldId === 'lastname') {
-                        $('#add-' + fieldId).prop("disabled", false);
-                    } else if (fieldId.startsWith('custom')) {
-                        customFieldIndex--;
-                        $('#add-custom-field').prop("disabled", false);
-                    }
-                    gsap.set(field, {y: 0, opacity: 1});
-                }
-            });
-        });
-
-        gsap.from('.sidebar', {duration: 1, x: -300, ease: "power3.out"});
-        gsap.from('.main-content', {duration: 1, x: 100, opacity: 0, ease: "power3.out", delay: 0.3});
-        gsap.from('.card', {duration: 0.5, y: 50, opacity: 0, ease: "power3.out", stagger: 0.1, delay: 0.5});
     });
+
+    function addField(fieldId, fieldName) {
+        const field = $('#field-' + fieldId);
+        field.css('display', 'block');
+        field.find('input').val(fieldName);
+        $('#add-' + fieldId).prop("disabled", true);
+
+        gsap.from(field, {duration: 0.5, y: 50, opacity: 0, ease: "power3.out"});
+    }
+
+    $('#add-firstname').click(function() {
+        addField('firstname', 'Prénom');
+    });
+
+    $('#add-lastname').click(function() {
+        addField('lastname', 'Nom');
+    });
+
+    let customFieldIndex = 1;
+    const totalCustomFields = 4;
+
+    function showMaxFieldsReachedAnimation() {
+        const notification = $('<div class="max-fields-notification">Nombre maximum de champs atteint!</div>');
+        $('body').append(notification);
+
+        gsap.fromTo(notification, 
+            {y: 50, opacity: 0},
+            {duration: 0.5, y: 0, opacity: 1, ease: "bounce.out"}
+        );
+
+        gsap.to(notification, {
+            duration: 0.5,
+            opacity: 0,
+            delay: 2,
+            onComplete: function() {
+                notification.remove();
+            }
+        });
+    }
+
+    $('#add-custom-field').click(function() {
+        if (customFieldIndex <= totalCustomFields) {
+            addField('custom' + customFieldIndex, '');
+            customFieldIndex++;
+            updateButtonState();
+        }
+    });
+
+    $(document).on('click', '.delete-field', function() {
+        const fieldId = $(this).data('field');
+        const field = $('#field-' + fieldId);
+
+        gsap.to(field, {
+            duration: 0.3,
+            y: -20,
+            opacity: 0,
+            ease: "power3.in",
+            onComplete: function() {
+                field.css('display', 'none');
+                field.find('input').val('');
+                if (fieldId === 'firstname' || fieldId === 'lastname') {
+                    $('#add-' + fieldId).prop("disabled", false);
+                } else if (fieldId.startsWith('custom')) {
+                    customFieldIndex--;
+                    updateButtonState();
+                }
+                gsap.set(field, {y: 0, opacity: 1});
+            }
+        });
+    });
+
+    function updateButtonState() {
+        const addButton = $('#add-custom-field');
+        if (customFieldIndex > totalCustomFields) {
+            addButton.addClass("max-reached");
+            addButton.prop("disabled", true);
+        } else {
+            addButton.removeClass("max-reached");
+            addButton.prop("disabled", false);
+        }
+    }
+
+    gsap.from('.sidebar', {duration: 1, x: -300, ease: "power3.out"});
+    gsap.from('.main-content', {duration: 1, x: 100, opacity: 0, ease: "power3.out", delay: 0.3});
+    gsap.from('.card', {duration: 0.5, y: 50, opacity: 0, ease: "power3.out", stagger: 0.1, delay: 0.5});
+});
     </script>
 
     <script>
