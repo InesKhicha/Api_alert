@@ -1,6 +1,6 @@
 <?php
-// src/AppBundle/Form/FileContentType.php
-namespace AppBundle\Form;
+// src/FormAlertBundle/Form/FileContentType.php
+namespace FormAlertBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -238,7 +238,7 @@ class FileContentType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => 'AppBundle\Entity\FileContent',
+            'data_class' => 'FormAlertBundle\Entity\FileContent',
             'formulaire' => null,
             'csrf_protection' => false, // Activez la protection CSRF
         ]);

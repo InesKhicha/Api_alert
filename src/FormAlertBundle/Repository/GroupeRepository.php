@@ -1,6 +1,6 @@
 <?php
-// src/AppBundle/Repository/GroupeRepository.php
-namespace AppBundle\Repository;
+// src/FormAlertBundle/Repository/GroupeRepository.php
+namespace FormAlertBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 

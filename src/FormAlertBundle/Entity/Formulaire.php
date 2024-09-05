@@ -1,6 +1,6 @@
 <?php
-// src/AppBundle/Entity/Formulaire.php
-namespace AppBundle\Entity;
+// src/FormAlertBundle/Entity/Formulaire.php
+namespace FormAlertBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 

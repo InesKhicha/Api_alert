@@ -1,30 +1,30 @@
 # app/config/routing.yml
 app:
-    resource: "@AppBundle/Controller/"
+    resource: "@FormAlertBundle/Controller/"
     type:     annotation
 
 user_register:
     path: /register
-    defaults: { _controller: AppBundle\Controller\RegistrationController::registerAction }
+    defaults: { _controller: FormAlertBundle\Controller\RegistrationController::registerAction }
 
 # app/config/routing.yml
 formulaire_create:
     path:     /formulaire/create
-    defaults: { _controller: AppBundle:Formulaire:createFormulaire }
+    defaults: { _controller: FormAlertBundle:Formulaire:createFormulaire }
 
 formulaire_success:
     path:     /formulaire/success/{code_formulaire}
-    defaults: { _controller: AppBundle:Formulaire:success }
+    defaults: { _controller: FormAlertBundle:Formulaire:success }
 
 # app/config/routing.yml
 app_formulaire:
-    resource: "@AppBundle/Controller/"
+    resource: "@FormAlertBundle/Controller/"
     type:     annotation
 
 creer_formulaire:
     path:     /creer-formulaire
-    defaults: { _controller: AppBundle:Formulaire:creerFormulaire }
+    defaults: { _controller: FormAlertBundle:Formulaire:creerFormulaire }
 
 afficher_formulaire:
     path:     /formulaire/{code}
-    defaults: { _controller: AppBundle:Formulaire:afficherFormulaire }
+    defaults: { _controller: FormAlertBundle:Formulaire:afficherFormulaire }

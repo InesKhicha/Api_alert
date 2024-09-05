@@ -3,6 +3,6 @@
 # app/config/services.yml
 services:
     app.sms_service:
-        class: AppBundle\Service\SMSService
+        class: FormAlertBundle\Service\SMSService
         arguments:
             - "@logger"

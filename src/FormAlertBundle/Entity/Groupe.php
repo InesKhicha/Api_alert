@@ -1,5 +1,5 @@
 <?php
-namespace AppBundle\Entity;
+namespace FormAlertBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 

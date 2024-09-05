@@ -1,6 +1,6 @@
 <?php
-// src/AppBundle/Form/Type/FormulaireType.php
-namespace AppBundle\Form;
+// src/FormAlertBundle/Form/Type/FormulaireType.php
+namespace FormAlertBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -31,7 +31,7 @@ class FormulaireType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-           'data_class' => 'AppBundle\Entity\Formulaire',
+           'data_class' => 'FormAlertBundle\Entity\Formulaire',
            'constraints' => [
                new Callback([$this, 'validate']),
            ],

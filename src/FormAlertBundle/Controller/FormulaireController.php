@@ -1,12 +1,12 @@
 <?php
-// src/AppBundle/Controller/FormulaireController.php
-namespace AppBundle\Controller;
-use AppBundle\Entity\Groupe;
-use AppBundle\Entity\CodeValide;
-use AppBundle\Entity\Formulaire;
-use AppBundle\Entity\FileContent;
-use AppBundle\Form\FormulaireType;
-use AppBundle\Form\FileContentType;
+// src/FormAlertBundle/Controller/FormulaireController.php
+namespace FormAlertBundle\Controller;
+use FormAlertBundle\Entity\Groupe;
+use FormAlertBundle\Entity\CodeValide;
+use FormAlertBundle\Entity\Formulaire;
+use FormAlertBundle\Entity\FileContent;
+use FormAlertBundle\Form\FormulaireType;
+use FormAlertBundle\Form\FileContentType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,7 +25,7 @@ public function creerFormulaireAction(Request $request)
 
     // Récupérer le client via l'API key (simulation avec un paramètre query string 'api_key')
     $smsUser = $this->getDoctrine()
-                   ->getRepository('AppBundle:SmsUser')
+                   ->getRepository('FormAlertBundle:SmsUser')
                    ->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
 
     if (!$smsUser) {
@@ -123,7 +123,7 @@ private function normalizeString($str)
 public function afficherFormulaireAction(Request $request, $code)
 {
     $em = $this->getDoctrine()->getManager();
-    $formulaire = $em->getRepository('AppBundle:Formulaire')->findOneBy(['codeFormulaire' => $code]);
+    $formulaire = $em->getRepository('FormAlertBundle:Formulaire')->findOneBy(['codeFormulaire' => $code]);
     
     if (!$formulaire) {
         throw $this->createNotFoundException('Formulaire non trouvé');
@@ -149,7 +149,7 @@ public function afficherFormulaireAction(Request $request, $code)
         $fileContent->setPhone($fullPhoneNumber);
 
         // Check if the user is already registered or not
-        $existingUser = $em->getRepository('AppBundle:FileContent')->findOneBy([
+        $existingUser = $em->getRepository('FormAlertBundle:FileContent')->findOneBy([
             'phone' => $fileContent->getPhone(),
             'grp' => $groupe
         ]);
@@ -163,7 +163,7 @@ public function afficherFormulaireAction(Request $request, $code)
         } else {
             // Check if the phone number exists in the last 5 minutes
             $fiveMinutesAgo = new \DateTime('-5 minutes');
-            $recentEntries = $em->getRepository('AppBundle:CodeValide')->findBy([
+            $recentEntries = $em->getRepository('FormAlertBundle:CodeValide')->findBy([
                 'phone' => $fileContent->getPhone(),
                 'expired' => false
             ], ['createdAt' => 'DESC']);
@@ -185,7 +185,7 @@ public function afficherFormulaireAction(Request $request, $code)
                 $this->addFlash('danger', 'Vous avez déjà effectué cette opération. Retournez à votre page précédente et entrez votre code.');
             } else {
                 // Proceed with the existing logic to handle the form submission
-                $codesToRemove = $em->getRepository('AppBundle:CodeValide')->createQueryBuilder('c')
+                $codesToRemove = $em->getRepository('FormAlertBundle:CodeValide')->createQueryBuilder('c')
                     ->where('c.expired = true OR c.createdAt < :fiveMinutesAgo')
                     ->setParameter('fiveMinutesAgo', $fiveMinutesAgo)
                     ->getQuery()
@@ -250,7 +250,7 @@ public function validateCodeAction(Request $request, $codeId)
     $em = $this->getDoctrine()->getManager();
 
     // Récupération du code de validation à partir de l'ID
-    $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
+    $codeValide = $em->getRepository('FormAlertBundle:CodeValide')->find($codeId);
 
     if ($codeValide) {
         // Vérification du temps écoulé depuis la création du code
@@ -292,14 +292,14 @@ public function validateCodeAction(Request $request, $codeId)
                     $fileContent->setCustom4($formData['custom4']);
                     $idgrp = $formData['grp'];
                     $action = $formData['action'];
-                    $groupe = $em->getRepository('AppBundle:Groupe')->find($idgrp);
+                    $groupe = $em->getRepository('FormAlertBundle:Groupe')->find($idgrp);
                     $fileContent->setGrp($groupe);
                 }
 
                 // Gestion des différentes actions (inscription ou désinscription)
                 if ($action === 'inscription') {
                     // Vérifier si l'utilisateur est déjà inscrit
-                    $existingUser = $em->getRepository('AppBundle:FileContent')->findOneBy([
+                    $existingUser = $em->getRepository('FormAlertBundle:FileContent')->findOneBy([
                         'phone' => $fileContent->getPhone(),
                         'grp' => $fileContent->getGrp()
                     ]);
@@ -316,7 +316,7 @@ public function validateCodeAction(Request $request, $codeId)
                     }
                 } elseif ($action === 'desinscription') {
                     // Vérifier si l'utilisateur est inscrit
-                    $fileContentRM = $em->getRepository('AppBundle:FileContent')->findOneBy([
+                    $fileContentRM = $em->getRepository('FormAlertBundle:FileContent')->findOneBy([
                         'phone' => $fileContent->getPhone(),
                         'grp' => $fileContent->getGrp()
                     ]);
@@ -367,7 +367,7 @@ public function desinscriptionSuccessAction()
 public function resendCodeAction($codeId)
 {
     $em = $this->getDoctrine()->getManager();
-    $codeValide = $em->getRepository('AppBundle:CodeValide')->find($codeId);
+    $codeValide = $em->getRepository('FormAlertBundle:CodeValide')->find($codeId);
 
     if ($codeValide) {
         $newValidationCode = mt_rand(100000, 999999);
@@ -400,10 +400,11 @@ public function resendCodeAction($codeId)
      * @Route("/mes-formulaires", name="mes_formulaires")
      */
     public function mesFormulairesAction(Request $request)
-    {
+    {//L'API de Compte SMS partner Perso
+        $apiKey = '8601b59cbba3cace735177b50292b80978b5c9bf';
         $smsUser = $this->getDoctrine()
-        ->getRepository('AppBundle:SmsUser')
-        ->findOneBy(['apiKey' => $this->getParameter('sms_api_key')]);
+        ->getRepository('FormAlertBundle:SmsUser')
+        ->findOneBy(['apiKey' => $apiKey]);
 
         if (!$smsUser) {
          throw $this->createNotFoundException('SmsUser non trouvé.');

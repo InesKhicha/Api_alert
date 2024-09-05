@@ -1,11 +1,11 @@
 <?php 
-// src/AppBundle/Repository/ClientRepository.php
+// src/FormAlertBundle/Repository/ClientRepository.php
 
-namespace AppBundle\Repository;
+namespace FormAlertBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
-class SmsUserRepository extends EntityRepository
+class ClientRepository extends EntityRepository
 {
     public function findByApiKey($apiKey)
     {

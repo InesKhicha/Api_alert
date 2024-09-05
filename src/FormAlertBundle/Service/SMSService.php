@@ -1,5 +1,5 @@
 <?php
-namespace AppBundle\Service;
+namespace FormAlertBundle\Service;
 
 use Psr\Log\LoggerInterface;
 

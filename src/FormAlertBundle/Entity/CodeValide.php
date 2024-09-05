@@ -1,11 +1,11 @@
 <?php
-// src/AppBundle/Entity/CodeValide.php
-namespace AppBundle\Entity;
+// src/FormAlertBundle/Entity/CodeValide.php
+namespace FormAlertBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="AppBundle\Repository\CodeValideRepository")
+ * @ORM\Entity(repositoryClass="FormAlertBundle\Repository\CodeValideRepository")
  * @ORM\Table(name="codevalide")
  */
 class CodeValide

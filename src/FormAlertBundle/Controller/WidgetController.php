@@ -1,6 +1,6 @@
 <?php
-// src/AppBundle/Controller/WidgetController.php
-namespace AppBundle\Controller;
+// src/FormAlertBundle/Controller/WidgetController.php
+namespace FormAlertBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +13,7 @@ class WidgetController extends Controller
      */
     public function widgetJsAction($formCode)
     {
-        $formulaire = $this->getDoctrine()->getRepository('AppBundle:Formulaire')->findOneBy(['codeFormulaire' => $formCode]);
+        $formulaire = $this->getDoctrine()->getRepository('FormAlertBundle:Formulaire')->findOneBy(['codeFormulaire' => $formCode]);
 
         if (!$formulaire) {
             throw $this->createNotFoundException('Formulaire non trouvé.');

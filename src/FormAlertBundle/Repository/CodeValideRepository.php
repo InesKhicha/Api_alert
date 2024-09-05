@@ -1,6 +1,6 @@
 <?php
-// src/AppBundle/Repository/CodeValideRepository.php
-namespace AppBundle\Repository;
+// src/FormAlertBundle/Repository/CodeValideRepository.php
+namespace FormAlertBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
