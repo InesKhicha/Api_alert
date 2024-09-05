@@ -5,5 +5,4 @@ services:
     app.sms_service:
         class: AppBundle\Service\SMSService
         arguments:
-            - "%sms_api_key%"
             - "@logger"

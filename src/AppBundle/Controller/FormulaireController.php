@@ -201,8 +201,9 @@ public function afficherFormulaireAction(Request $request, $code)
                 $phoneNumber = $fileContent->getPhone();
                 $message = "Votre code de validation est : $validationCode";
                 $smsService = $this->get('app.sms_service');
-                $response = $smsService->sendSms($phoneNumber, $message);
-
+                //L'API de Compte SMS partner Perso
+                $apiKey = '8601b59cbba3cace735177b50292b80978b5c9bf';
+                $response = $smsService->sendSms($apiKey, $phoneNumber, $message);
                 if (isset($response['success']) && $response['success']) {
                     $codeValide = new CodeValide();
                     $codeValide->setCode($validationCode);
@@ -374,10 +375,11 @@ public function resendCodeAction($codeId)
         $message = "Votre nouveau code de validation est : $newValidationCode";
 
         $smsService = $this->get('app.sms_service');
-        $response = $smsService->sendSms($phoneNumber, $message);
+        //L'API de Compte SMS partner Perso
+        $apiKey = '8601b59cbba3cace735177b50292b80978b5c9bf';
+        $response = $smsService->sendSms($apiKey, $phoneNumber, $message);
 
         if (isset($response['success']) && $response['success']) {
-            // Mettre à jour le code existant
             $codeValide->setCode($newValidationCode);
             $codeValide->setCreatedAt(new \DateTime());
             $codeValide->setExpired(false);
