@@ -162,7 +162,7 @@ class FileContentType extends AbstractType
                 'required' => false,
                 'constraints' => [
                     new Assert\Length([
-                        'max' => 255,
+                        'max' => 32,
                         'maxMessage' => 'Le champ ne peut pas dépasser {{ limit }} caractères.',
                     ]),
                 ],
@@ -175,7 +175,7 @@ class FileContentType extends AbstractType
                 'required' => false,
                 'constraints' => [
                     new Assert\Length([
-                        'max' => 255,
+                        'max' => 32,
                         'maxMessage' => 'Le champ ne peut pas dépasser {{ limit }} caractères.',
                     ]),
                 ],
